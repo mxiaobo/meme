@@ -1,0 +1,9 @@
+{
+  "name": "Meme 50-25-25 Calculator",
+  "short_name": "MemeCalc",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f7f7f7",
+  "description": "Offline calculator for meme 50/25/25 strategy",
+  "icons": []
+}
