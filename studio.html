@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>小博现金流工作室</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f11;
+  --card:#1e1f23;
+  --card-2:#24262b;
+  --border:#2b2d33;
+  --text:#e8e9ea;
+  --muted:#9aa0a6;
+  --accent:#3b82f6;
+  --green:#10b981;
+  --red:#ef4444;
+  --amber:#f59e0b;
+}
+@media (prefers-color-scheme:light){
+  :root{
+    --bg:#f5f7fa;
+    --card:#ffffff;
+    --card-2:#f0f2f5;
+    --border:#e4e6eb;
+    --text:#1f2328;
+    --muted:#6b7280;
+    --accent:#2563eb;
+    --green:#059669;
+    --red:#dc2626;
+    --amber:#d97706;
+  }
+}
+*{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+body{margin:0;background:var(--bg);color:var(--text);min-height:100vh;}
+header{padding:1rem 1rem .5rem;max-width:900px;margin:0 auto;}
+h1{font-size:1.3rem;margin:0 0 .75rem;font-weight:700;}
+.tabs{display:flex;gap:.25rem;overflow-x:auto;border-bottom:1px solid var(--border);padding-bottom:0;}
+.tabs button{background:none;border:none;color:var(--muted);padding:.6rem .9rem;font-size:.9rem;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-weight:500;}
+.tabs button.active{color:var(--text);border-bottom-color:var(--accent);}
+main{max-width:900px;margin:0 auto;padding:1rem;}
+section{display:none;}
+section.active{display:block;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-bottom:1rem;}
+.card h2{font-size:1rem;margin:0 0 .75rem;font-weight:600;}
+.grid{display:grid;gap:.75rem;}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+@media(max-width:600px){.grid-3{grid-template-columns:repeat(2,1fr);}}
+.stat{background:var(--card-2);border-radius:10px;padding:.8rem .9rem;}
+.stat .label{font-size:.75rem;color:var(--muted);margin-bottom:.25rem;}
+.stat .value{font-size:1.2rem;font-weight:600;}
+.stat .sub{font-size:.7rem;color:var(--muted);margin-top:.2rem;}
+.value.pos{color:var(--green);}
+.value.neg{color:var(--red);}
+label{display:flex;flex-direction:column;font-size:.85rem;color:var(--muted);margin-top:.75rem;gap:.3rem;}
+input,select{padding:.55rem .7rem;font-size:.95rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);width:100%;}
+input:focus,select:focus{outline:none;border-color:var(--accent);}
+.row{display:flex;gap:.6rem;}
+.row > label{flex:1;}
+button.btn{padding:.6rem 1rem;font-size:.95rem;font-weight:500;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;}
+button.btn:hover{filter:brightness(1.1);}
+button.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border);}
+button.btn.danger{background:var(--red);}
+button.btn.small{padding:.35rem .6rem;font-size:.8rem;}
+.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem;}
+.type-switch{display:flex;gap:.25rem;background:var(--card-2);padding:.25rem;border-radius:8px;margin-bottom:.5rem;}
+.type-switch button{flex:1;padding:.5rem;border:none;background:transparent;color:var(--muted);border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:500;}
+.type-switch button.active{background:var(--card);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.1);}
+table{width:100%;border-collapse:collapse;font-size:.85rem;}
+th,td{padding:.5rem .45rem;border-bottom:1px solid var(--border);text-align:left;}
+th{font-size:.75rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.03em;}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
+tr:last-child td{border-bottom:none;}
+.muted{color:var(--muted);font-size:.8rem;}
+.pill{display:inline-block;padding:.12rem .5rem;font-size:.7rem;background:var(--card-2);border-radius:999px;color:var(--muted);}
+.channel-row{display:flex;align-items:center;justify-content:space-between;padding:.7rem 0;border-bottom:1px solid var(--border);gap:.5rem;flex-wrap:wrap;}
+.channel-row:last-child{border-bottom:none;}
+.channel-row .name{font-weight:500;}
+.channel-row .stats{display:flex;gap:1rem;font-size:.8rem;color:var(--muted);}
+.channel-row .stats b{color:var(--text);font-weight:600;}
+.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem;}
+.filters select,.filters input{width:auto;flex:1;min-width:120px;}
+.empty{text-align:center;color:var(--muted);padding:2rem 1rem;font-size:.9rem;}
+.fx-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.inline-del{color:var(--red);background:none;border:none;cursor:pointer;font-size:.8rem;padding:.2rem .4rem;}
+.hint{font-size:.75rem;color:var(--muted);margin-top:.3rem;}
+.section-tabs{display:flex;gap:.25rem;margin-bottom:.75rem;background:var(--card-2);padding:.25rem;border-radius:8px;}
+.section-tabs button{flex:1;padding:.4rem;border:none;background:transparent;color:var(--muted);border-radius:6px;cursor:pointer;font-size:.82rem;}
+.section-tabs button.active{background:var(--card);color:var(--text);}
+.sub-list{display:none;}
+.sub-list.active{display:block;}
+</style>
+</head>
+<body>
+<header>
+  <h1>小博现金流工作室</h1>
+  <nav class="tabs" id="tabs">
+    <button data-tab="dash" class="active">仪表盘</button>
+    <button data-tab="entry">记一笔</button>
+    <button data-tab="channels">渠道</button>
+    <button data-tab="detail">明细</button>
+    <button data-tab="settings">设置</button>
+  </nav>
+</header>
+
+<main>
+  <!-- DASHBOARD -->
+  <section id="tab-dash" class="active">
+    <div class="card">
+      <h2>概览（USD 折算）</h2>
+      <div class="grid grid-3">
+        <div class="stat"><div class="label">本月收入</div><div class="value pos" id="s-month"></div><div class="sub" id="s-month-sub"></div></div>
+        <div class="stat"><div class="label">YTD 收入</div><div class="value pos" id="s-ytd"></div></div>
+        <div class="stat"><div class="label">当前占用本金</div><div class="value" id="s-principal"></div></div>
+        <div class="stat"><div class="label">综合简单年化</div><div class="value" id="s-apy"></div><div class="sub">本月收入 × 12 / 本金</div></div>
+        <div class="stat"><div class="label">JEPQ 累计定投</div><div class="value" id="s-jepq"></div><div class="sub" id="s-jepq-sub"></div></div>
+        <div class="stat"><div class="label">本月净现金流</div><div class="value" id="s-net"></div><div class="sub">收入 − 定投 − 追加本金</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>各渠道本月表现</h2>
+      <div id="dash-channels"></div>
+    </div>
+  </section>
+
+  <!-- ENTRY -->
+  <section id="tab-entry">
+    <div class="card">
+      <h2>记一笔</h2>
+      <div class="type-switch" id="entry-type">
+        <button data-type="income" class="active">收入</button>
+        <button data-type="principal">本金变动</button>
+        <button data-type="jepq">JEPQ 定投</button>
+      </div>
+
+      <form id="entry-form">
+        <label id="lbl-channel">渠道
+          <select name="channel_id"></select>
+        </label>
+
+        <div class="row">
+          <label>日期<input type="date" name="date" required></label>
+          <label id="lbl-direction" style="display:none;">方向
+            <select name="direction"><option value="in">投入</option><option value="out">赎回</option></select>
+          </label>
+        </div>
+
+        <div class="row">
+          <label>金额<input type="number" name="amount" step="0.01" min="0" required></label>
+          <label>货币
+            <select name="currency" id="cur-sel"></select>
+          </label>
+        </div>
+
+        <label>汇率（1 <span id="cur-label">USD</span> = ? USD）
+          <input type="number" name="fx_rate" step="0.0001" min="0" required>
+          <span class="hint">默认使用设置里的汇率，可按需覆盖</span>
+        </label>
+
+        <label>备注（可选）<input type="text" name="note" placeholder="例如：腾讯 2024 年中期派息"></label>
+
+        <div class="actions">
+          <button type="submit" class="btn">保存</button>
+          <button type="reset" class="btn ghost">清空</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- CHANNELS -->
+  <section id="tab-channels">
+    <div class="card">
+      <h2>渠道列表</h2>
+      <div id="channel-list"></div>
+    </div>
+    <div class="card">
+      <h2>新增渠道</h2>
+      <form id="channel-form">
+        <div class="row">
+          <label>名称<input type="text" name="name" required></label>
+          <label>分类
+            <select name="category">
+              <option>股息</option><option>港股打新</option><option>Bitfinex放贷</option>
+              <option>Web3</option><option>其他</option>
+            </select>
+          </label>
+        </div>
+        <label><input type="checkbox" name="requires_principal" checked style="width:auto;margin-right:.4rem;">需要投入本金（参与年化计算）</label>
+        <div class="actions"><button type="submit" class="btn">添加</button></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- DETAILS -->
+  <section id="tab-detail">
+    <div class="card">
+      <div class="section-tabs" id="detail-tabs">
+        <button data-list="incomes" class="active">收入</button>
+        <button data-list="principals">本金</button>
+        <button data-list="jepq">JEPQ</button>
+      </div>
+      <div class="filters">
+        <input type="month" id="f-month" placeholder="按月筛选">
+        <select id="f-channel"><option value="">全部渠道</option></select>
+        <button class="btn ghost small" id="f-clear">清除筛选</button>
+      </div>
+      <div id="list-incomes" class="sub-list active"></div>
+      <div id="list-principals" class="sub-list"></div>
+      <div id="list-jepq" class="sub-list"></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="tab-settings">
+    <div class="card">
+      <h2>汇率（转 USD）</h2>
+      <div class="fx-grid" id="fx-grid"></div>
+      <div class="actions">
+        <button class="btn" id="fx-save">保存汇率</button>
+        <button class="btn ghost" id="fx-add">新增币种</button>
+      </div>
+      <p class="hint">汇率变动只影响「未来」录入时的默认值；已录入的条目保留当时填写的汇率，不会被改动。</p>
+    </div>
+    <div class="card">
+      <h2>数据备份</h2>
+      <div class="actions">
+        <button class="btn ghost" id="btn-export">导出 JSON</button>
+        <button class="btn ghost" id="btn-import">导入 JSON</button>
+        <input type="file" id="file-import" accept="application/json" style="display:none;">
+        <button class="btn danger" id="btn-clear">清空全部数据</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+
+// ===== Storage =====
+const KEYS={channels:'studio_channels',principals:'studio_principals',incomes:'studio_incomes',jepq:'studio_jepq',fx:'studio_fx'};
+const DEFAULT_FX={USD:1,USDT:1,CNY:0.14,HKD:0.128,EUR:1.08};
+const DEFAULT_CHANNELS=[
+  {id:'ch-div',name:'股息',category:'股息',requires_principal:true,active:true},
+  {id:'ch-ipo',name:'港股打新',category:'港股打新',requires_principal:true,active:true},
+  {id:'ch-bfx',name:'Bitfinex 放贷',category:'Bitfinex放贷',requires_principal:true,active:true},
+  {id:'ch-w3',name:'Web3 收入',category:'Web3',requires_principal:false,active:true}
+];
+const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch{return d;}};
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+
+let channels=load(KEYS.channels,null);
+if(!channels){channels=DEFAULT_CHANNELS;save(KEYS.channels,channels);}
+let principals=load(KEYS.principals,[]);
+let incomes=load(KEYS.incomes,[]);
+let jepq=load(KEYS.jepq,[]);
+let fx=load(KEYS.fx,DEFAULT_FX);
+
+// ===== Utils =====
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const todayStr=()=>new Date().toISOString().slice(0,10);
+const monthStr=(d)=>(d||todayStr()).slice(0,7);
+const thisMonth=monthStr();
+const thisYear=thisMonth.slice(0,4);
+const toUSD=(amt,rate)=>(+amt)*(+rate);
+const fmtUSD=(n)=>'$'+(+n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtPct=(n)=>{if(!isFinite(n))return '—';return (n*100).toFixed(1)+'%';};
+const channelById=(id)=>channels.find(c=>c.id===id);
+
+// ===== Tabs =====
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-tab]');if(!b)return;
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('main > section').forEach(s=>s.classList.toggle('active',s.id==='tab-'+b.dataset.tab));
+  if(b.dataset.tab==='dash')renderDash();
+  if(b.dataset.tab==='channels')renderChannels();
+  if(b.dataset.tab==='detail')renderDetail();
+  if(b.dataset.tab==='settings')renderFx();
+});
+
+// ===== Entry form =====
+const entryForm=document.getElementById('entry-form');
+const entryType=document.getElementById('entry-type');
+let curType='income';
+
+function syncFxDefault(){
+  const cur=entryForm.currency.value;
+  document.getElementById('cur-label').textContent=cur;
+  entryForm.fx_rate.value=fx[cur]??1;
+}
+function refreshChannelSelect(){
+  const sel=entryForm.channel_id;
+  sel.innerHTML=channels.filter(c=>c.active).map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('f-channel').innerHTML='<option value="">全部渠道</option>'+channels.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+}
+function refreshCurrencySelect(){
+  const sel=document.getElementById('cur-sel');
+  const cur=sel.value;
+  sel.innerHTML=Object.keys(fx).map(c=>`<option>${c}</option>`).join('');
+  sel.value=cur&&fx[cur]?cur:'USD';
+  syncFxDefault();
+}
+function updateEntryFormShape(){
+  const lblCh=document.getElementById('lbl-channel');
+  const lblDir=document.getElementById('lbl-direction');
+  if(curType==='jepq'){
+    lblCh.style.display='none';
+    lblDir.style.display='none';
+    entryForm.currency.value='USD';
+    syncFxDefault();
+  }else if(curType==='principal'){
+    lblCh.style.display='';
+    lblDir.style.display='';
+  }else{
+    lblCh.style.display='';
+    lblDir.style.display='none';
+  }
+}
+entryType.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-type]');if(!b)return;
+  curType=b.dataset.type;
+  document.querySelectorAll('#entry-type button').forEach(x=>x.classList.toggle('active',x===b));
+  updateEntryFormShape();
+});
+entryForm.currency.addEventListener('change',syncFxDefault);
+entryForm.date.value=todayStr();
+
+entryForm.addEventListener('submit',e=>{
+  e.preventDefault();
+  const f=new FormData(entryForm);
+  const amount=parseFloat(f.get('amount'));
+  const fx_rate=parseFloat(f.get('fx_rate'));
+  if(!(amount>=0)||!(fx_rate>0)){alert('请检查金额和汇率');return;}
+  const base={id:uid(),date:f.get('date'),amount,currency:f.get('currency'),fx_rate,note:f.get('note')||''};
+  if(curType==='income'){
+    incomes.push({...base,channel_id:f.get('channel_id')});
+    save(KEYS.incomes,incomes);
+  }else if(curType==='principal'){
+    principals.push({...base,channel_id:f.get('channel_id'),direction:f.get('direction')});
+    save(KEYS.principals,principals);
+  }else{
+    jepq.push({id:base.id,date:base.date,amount:base.amount,currency:'USD',fx_rate:1,note:base.note});
+    save(KEYS.jepq,jepq);
+  }
+  entryForm.reset();
+  entryForm.date.value=todayStr();
+  refreshCurrencySelect();
+  updateEntryFormShape();
+  renderDash();
+  alert('已保存');
+});
+
+// ===== Dashboard =====
+function sumUSD(arr,filter){
+  return arr.filter(filter).reduce((s,x)=>s+toUSD(x.amount,x.fx_rate),0);
+}
+function principalForChannel(chId,asOfMonth){
+  // asOfMonth like "2026-04" means up to end of that month; null = all time
+  return principals.filter(p=>p.channel_id===chId && (!asOfMonth||p.date<=asOfMonth+'-31'))
+    .reduce((s,p)=>s+toUSD(p.amount,p.fx_rate)*(p.direction==='in'?1:-1),0);
+}
+function renderDash(){
+  const monthInc=sumUSD(incomes,x=>monthStr(x.date)===thisMonth);
+  const ytdInc=sumUSD(incomes,x=>x.date.startsWith(thisYear));
+  const totalPrincipal=channels.filter(c=>c.requires_principal).reduce((s,c)=>s+Math.max(0,principalForChannel(c.id,thisMonth)),0);
+  const apy=totalPrincipal>0?(monthInc*12/totalPrincipal):NaN;
+  const jepqTotal=jepq.reduce((s,x)=>s+x.amount,0);
+  const jepqMonth=jepq.filter(x=>monthStr(x.date)===thisMonth).reduce((s,x)=>s+x.amount,0);
+  const principalAdd=principals.filter(p=>monthStr(p.date)===thisMonth).reduce((s,p)=>s+toUSD(p.amount,p.fx_rate)*(p.direction==='in'?1:-1),0);
+  const net=monthInc-jepqMonth-Math.max(0,principalAdd);
+
+  document.getElementById('s-month').textContent=fmtUSD(monthInc);
+  document.getElementById('s-month-sub').textContent=thisMonth;
+  document.getElementById('s-ytd').textContent=fmtUSD(ytdInc);
+  document.getElementById('s-principal').textContent=fmtUSD(totalPrincipal);
+  const apyEl=document.getElementById('s-apy');
+  apyEl.textContent=fmtPct(apy);
+  apyEl.className='value '+(isFinite(apy)&&apy>0?'pos':'');
+  document.getElementById('s-jepq').textContent=fmtUSD(jepqTotal);
+  document.getElementById('s-jepq-sub').textContent='本月 '+fmtUSD(jepqMonth);
+  const netEl=document.getElementById('s-net');
+  netEl.textContent=fmtUSD(net);
+  netEl.className='value '+(net>=0?'pos':'neg');
+
+  // per-channel
+  const box=document.getElementById('dash-channels');
+  const rows=channels.filter(c=>c.active).map(c=>{
+    const p=principalForChannel(c.id,thisMonth);
+    const mInc=sumUSD(incomes,x=>x.channel_id===c.id&&monthStr(x.date)===thisMonth);
+    const ytd=sumUSD(incomes,x=>x.channel_id===c.id&&x.date.startsWith(thisYear));
+    const a=(c.requires_principal&&p>0)?mInc*12/p:NaN;
+    return `<div class="channel-row">
+      <div><div class="name">${c.name}</div><span class="pill">${c.category}</span>${c.requires_principal?'':' <span class="pill">无本金</span>'}</div>
+      <div class="stats">
+        <span>本金 <b>${fmtUSD(p)}</b></span>
+        <span>本月 <b>${fmtUSD(mInc)}</b></span>
+        <span>YTD <b>${fmtUSD(ytd)}</b></span>
+        <span>年化 <b>${c.requires_principal?fmtPct(a):'—'}</b></span>
+      </div>
+    </div>`;
+  }).join('');
+  box.innerHTML=rows||'<div class="empty">还没有启用的渠道</div>';
+}
+
+// ===== Channels =====
+function renderChannels(){
+  const box=document.getElementById('channel-list');
+  box.innerHTML=channels.map(c=>{
+    const p=principalForChannel(c.id,thisMonth);
+    return `<div class="channel-row">
+      <div><div class="name">${c.name}</div>
+        <span class="pill">${c.category}</span>
+        ${c.requires_principal?'<span class="pill">需本金</span>':'<span class="pill">无本金</span>'}
+        ${c.active?'':'<span class="pill">已停用</span>'}
+      </div>
+      <div class="stats"><span>本金 <b>${fmtUSD(p)}</b></span></div>
+      <div>
+        <button class="btn ghost small" data-act="toggle" data-id="${c.id}">${c.active?'停用':'启用'}</button>
+        <button class="btn ghost small" data-act="rename" data-id="${c.id}">改名</button>
+        <button class="btn ghost small" data-act="del" data-id="${c.id}">删除</button>
+      </div>
+    </div>`;
+  }).join('')||'<div class="empty">暂无渠道</div>';
+}
+document.getElementById('channel-list').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-act]');if(!b)return;
+  const c=channelById(b.dataset.id);if(!c)return;
+  if(b.dataset.act==='toggle'){c.active=!c.active;}
+  if(b.dataset.act==='rename'){const n=prompt('新名称',c.name);if(n)c.name=n.trim();}
+  if(b.dataset.act==='del'){
+    const hasData=incomes.some(x=>x.channel_id===c.id)||principals.some(x=>x.channel_id===c.id);
+    if(hasData&&!confirm('该渠道已有流水，删除会隐藏它但保留数据。继续？'))return;
+    if(!hasData&&!confirm('确认删除该渠道？'))return;
+    channels=channels.filter(x=>x.id!==c.id);
+  }
+  save(KEYS.channels,channels);
+  refreshChannelSelect();renderChannels();
+});
+document.getElementById('channel-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const f=new FormData(e.target);
+  channels.push({id:'ch-'+uid(),name:f.get('name').trim(),category:f.get('category'),requires_principal:f.get('requires_principal')==='on',active:true});
+  save(KEYS.channels,channels);
+  e.target.reset();
+  refreshChannelSelect();renderChannels();
+});
+
+// ===== Detail =====
+let curList='incomes';
+document.getElementById('detail-tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-list]');if(!b)return;
+  curList=b.dataset.list;
+  document.querySelectorAll('#detail-tabs button').forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('.sub-list').forEach(s=>s.classList.toggle('active',s.id==='list-'+curList));
+  document.getElementById('f-channel').style.display=curList==='jepq'?'none':'';
+  renderDetail();
+});
+['f-month','f-channel'].forEach(id=>document.getElementById(id).addEventListener('change',renderDetail));
+document.getElementById('f-clear').addEventListener('click',()=>{document.getElementById('f-month').value='';document.getElementById('f-channel').value='';renderDetail();});
+
+function renderDetail(){
+  const m=document.getElementById('f-month').value;
+  const ch=document.getElementById('f-channel').value;
+  const filt=(x)=>(!m||monthStr(x.date)===m)&&(!ch||x.channel_id===ch);
+  const rowsIncome=incomes.filter(filt).sort((a,b)=>b.date.localeCompare(a.date));
+  const rowsPrin=principals.filter(filt).sort((a,b)=>b.date.localeCompare(a.date));
+  const rowsJepq=jepq.filter(x=>!m||monthStr(x.date)===m).sort((a,b)=>b.date.localeCompare(a.date));
+
+  document.getElementById('list-incomes').innerHTML=rowsIncome.length?tableHTML(
+    ['日期','渠道','金额','USD','备注',''],
+    rowsIncome.map(r=>[r.date,channelById(r.channel_id)?.name||'—',`${r.amount} ${r.currency}`,fmtUSD(toUSD(r.amount,r.fx_rate)),r.note||'',delBtn('incomes',r.id)])
+  ):'<div class="empty">无记录</div>';
+
+  document.getElementById('list-principals').innerHTML=rowsPrin.length?tableHTML(
+    ['日期','渠道','方向','金额','USD','备注',''],
+    rowsPrin.map(r=>[r.date,channelById(r.channel_id)?.name||'—',r.direction==='in'?'投入':'赎回',`${r.amount} ${r.currency}`,fmtUSD(toUSD(r.amount,r.fx_rate)*(r.direction==='in'?1:-1)),r.note||'',delBtn('principals',r.id)])
+  ):'<div class="empty">无记录</div>';
+
+  document.getElementById('list-jepq').innerHTML=rowsJepq.length?tableHTML(
+    ['日期','金额 USD','备注',''],
+    rowsJepq.map(r=>[r.date,fmtUSD(r.amount),r.note||'',delBtn('jepq',r.id)])
+  ):'<div class="empty">无记录</div>';
+}
+function tableHTML(heads,rows){
+  const isNum=(i,h)=>['金额','USD','金额 USD'].includes(h);
+  return `<table><thead><tr>${heads.map((h,i)=>`<th class="${isNum(i,h)?'num':''}">${h}</th>`).join('')}</tr></thead><tbody>${
+    rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${isNum(i,heads[i])?'num':''}">${c}</td>`).join('')}</tr>`).join('')
+  }</tbody></table>`;
+}
+function delBtn(kind,id){return `<button class="inline-del" data-del="${kind}" data-id="${id}">删除</button>`;}
+document.querySelectorAll('.sub-list').forEach(el=>el.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-del]');if(!b)return;
+  if(!confirm('删除这条记录？'))return;
+  const kind=b.dataset.del,id=b.dataset.id;
+  if(kind==='incomes'){incomes=incomes.filter(x=>x.id!==id);save(KEYS.incomes,incomes);}
+  if(kind==='principals'){principals=principals.filter(x=>x.id!==id);save(KEYS.principals,principals);}
+  if(kind==='jepq'){jepq=jepq.filter(x=>x.id!==id);save(KEYS.jepq,jepq);}
+  renderDetail();
+}));
+
+// ===== Settings / FX =====
+function renderFx(){
+  const g=document.getElementById('fx-grid');
+  g.innerHTML=Object.entries(fx).map(([k,v])=>`
+    <label>${k}<input type="number" step="0.0001" min="0" data-fx="${k}" value="${v}" ${k==='USD'?'disabled':''}></label>
+  `).join('');
+}
+document.getElementById('fx-save').addEventListener('click',()=>{
+  document.querySelectorAll('#fx-grid input[data-fx]').forEach(i=>{
+    const v=parseFloat(i.value);if(v>0)fx[i.dataset.fx]=v;
+  });
+  save(KEYS.fx,fx);refreshCurrencySelect();alert('汇率已保存');
+});
+document.getElementById('fx-add').addEventListener('click',()=>{
+  const code=(prompt('币种代码，如 JPY / GBP')||'').trim().toUpperCase();
+  if(!code||fx[code])return;
+  const rate=parseFloat(prompt(`1 ${code} = ? USD`));
+  if(!(rate>0))return;
+  fx[code]=rate;save(KEYS.fx,fx);renderFx();refreshCurrencySelect();
+});
+
+// ===== Backup =====
+document.getElementById('btn-export').addEventListener('click',()=>{
+  const data={channels,principals,incomes,jepq,fx,exported_at:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`studio-backup-${todayStr()}.json`;
+  a.click();URL.revokeObjectURL(a.href);
+});
+document.getElementById('btn-import').addEventListener('click',()=>document.getElementById('file-import').click());
+document.getElementById('file-import').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!confirm('导入会覆盖当前数据，确认继续？'))return;
+      if(Array.isArray(d.channels))channels=d.channels;
+      if(Array.isArray(d.principals))principals=d.principals;
+      if(Array.isArray(d.incomes))incomes=d.incomes;
+      if(Array.isArray(d.jepq))jepq=d.jepq;
+      if(d.fx&&typeof d.fx==='object')fx=d.fx;
+      save(KEYS.channels,channels);save(KEYS.principals,principals);save(KEYS.incomes,incomes);save(KEYS.jepq,jepq);save(KEYS.fx,fx);
+      refreshChannelSelect();refreshCurrencySelect();renderDash();renderChannels();renderDetail();renderFx();
+      alert('已导入');
+    }catch(err){alert('文件格式不对：'+err.message);}
+  };
+  r.readAsText(f);
+});
+document.getElementById('btn-clear').addEventListener('click',()=>{
+  if(!confirm('将清空所有记录和自定义渠道，此操作不可撤销。确认？'))return;
+  if(!confirm('再次确认：真的清空全部数据？'))return;
+  localStorage.removeItem(KEYS.channels);localStorage.removeItem(KEYS.principals);
+  localStorage.removeItem(KEYS.incomes);localStorage.removeItem(KEYS.jepq);localStorage.removeItem(KEYS.fx);
+  location.reload();
+});
+
+// ===== Init =====
+refreshChannelSelect();
+refreshCurrencySelect();
+updateEntryFormShape();
+renderDash();
+</script>
+</body>
+</html>
