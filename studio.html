@@ -17,7 +17,6 @@
   --accent:#3b82f6;
   --green:#10b981;
   --red:#ef4444;
-  --amber:#f59e0b;
 }
 @media (prefers-color-scheme:light){
   :root{
@@ -30,14 +29,13 @@
     --accent:#2563eb;
     --green:#059669;
     --red:#dc2626;
-    --amber:#d97706;
   }
 }
 *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
 body{margin:0;background:var(--bg);color:var(--text);min-height:100vh;}
 header{padding:1rem 1rem .5rem;max-width:900px;margin:0 auto;}
 h1{font-size:1.3rem;margin:0 0 .75rem;font-weight:700;}
-.tabs{display:flex;gap:.25rem;overflow-x:auto;border-bottom:1px solid var(--border);padding-bottom:0;}
+.tabs{display:flex;gap:.25rem;overflow-x:auto;border-bottom:1px solid var(--border);}
 .tabs button{background:none;border:none;color:var(--muted);padding:.6rem .9rem;font-size:.9rem;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-weight:500;}
 .tabs button.active{color:var(--text);border-bottom-color:var(--accent);}
 main{max-width:900px;margin:0 auto;padding:1rem;}
@@ -46,7 +44,6 @@ section.active{display:block;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-bottom:1rem;}
 .card h2{font-size:1rem;margin:0 0 .75rem;font-weight:600;}
 .grid{display:grid;gap:.75rem;}
-.grid-2{grid-template-columns:repeat(2,1fr);}
 .grid-3{grid-template-columns:repeat(3,1fr);}
 @media(max-width:600px){.grid-3{grid-template-columns:repeat(2,1fr);}}
 .stat{background:var(--card-2);border-radius:10px;padding:.8rem .9rem;}
@@ -56,7 +53,7 @@ section.active{display:block;}
 .value.pos{color:var(--green);}
 .value.neg{color:var(--red);}
 label{display:flex;flex-direction:column;font-size:.85rem;color:var(--muted);margin-top:.75rem;gap:.3rem;}
-input,select{padding:.55rem .7rem;font-size:.95rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);width:100%;}
+input,select{padding:.55rem .7rem;font-size:.95rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);width:100%;font-variant-numeric:tabular-nums;}
 input:focus,select:focus{outline:none;border-color:var(--accent);}
 .row{display:flex;gap:.6rem;}
 .row > label{flex:1;}
@@ -66,25 +63,21 @@ button.btn.ghost{background:transparent;color:var(--text);border:1px solid var(-
 button.btn.danger{background:var(--red);}
 button.btn.small{padding:.35rem .6rem;font-size:.8rem;}
 .actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem;}
-.type-switch{display:flex;gap:.25rem;background:var(--card-2);padding:.25rem;border-radius:8px;margin-bottom:.5rem;}
-.type-switch button{flex:1;padding:.5rem;border:none;background:transparent;color:var(--muted);border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:500;}
-.type-switch button.active{background:var(--card);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.1);}
 table{width:100%;border-collapse:collapse;font-size:.85rem;}
-th,td{padding:.5rem .45rem;border-bottom:1px solid var(--border);text-align:left;}
-th{font-size:.75rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.03em;}
+th,td{padding:.5rem .45rem;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle;}
+th{font-size:.75rem;color:var(--muted);font-weight:500;}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
 tr:last-child td{border-bottom:none;}
 .muted{color:var(--muted);font-size:.8rem;}
-.pill{display:inline-block;padding:.12rem .5rem;font-size:.7rem;background:var(--card-2);border-radius:999px;color:var(--muted);}
+.pill{display:inline-block;padding:.12rem .5rem;font-size:.7rem;background:var(--card-2);border-radius:999px;color:var(--muted);margin-left:.3rem;}
 .channel-row{display:flex;align-items:center;justify-content:space-between;padding:.7rem 0;border-bottom:1px solid var(--border);gap:.5rem;flex-wrap:wrap;}
 .channel-row:last-child{border-bottom:none;}
 .channel-row .name{font-weight:500;}
 .channel-row .stats{display:flex;gap:1rem;font-size:.8rem;color:var(--muted);}
 .channel-row .stats b{color:var(--text);font-weight:600;}
 .filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem;}
-.filters select,.filters input{width:auto;flex:1;min-width:120px;}
+.filters select,.filters input{width:auto;flex:1;min-width:140px;}
 .empty{text-align:center;color:var(--muted);padding:2rem 1rem;font-size:.9rem;}
-.fx-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
 .inline-del{color:var(--red);background:none;border:none;cursor:pointer;font-size:.8rem;padding:.2rem .4rem;}
 .hint{font-size:.75rem;color:var(--muted);margin-top:.3rem;}
 .section-tabs{display:flex;gap:.25rem;margin-bottom:.75rem;background:var(--card-2);padding:.25rem;border-radius:8px;}
@@ -92,6 +85,15 @@ tr:last-child td{border-bottom:none;}
 .section-tabs button.active{background:var(--card);color:var(--text);}
 .sub-list{display:none;}
 .sub-list.active{display:block;}
+.month-head{display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;}
+.month-head input{max-width:180px;}
+table.entry-grid td{padding:.35rem .35rem;}
+table.entry-grid td.ch{font-weight:500;color:var(--text);min-width:8em;}
+table.entry-grid input{padding:.4rem .55rem;font-size:.9rem;}
+table.entry-grid input.note{font-size:.8rem;}
+.saved-flash{background:var(--green);color:#fff;padding:.5rem .8rem;border-radius:6px;font-size:.85rem;display:none;}
+.saved-flash.show{display:inline-block;animation:fade 1.6s forwards;}
+@keyframes fade{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
 </style>
 </head>
 <body>
@@ -99,7 +101,7 @@ tr:last-child td{border-bottom:none;}
   <h1>小博现金流工作室</h1>
   <nav class="tabs" id="tabs">
     <button data-tab="dash" class="active">仪表盘</button>
-    <button data-tab="entry">记一笔</button>
+    <button data-tab="entry">月度录入</button>
     <button data-tab="channels">渠道</button>
     <button data-tab="detail">明细</button>
     <button data-tab="settings">设置</button>
@@ -110,7 +112,7 @@ tr:last-child td{border-bottom:none;}
   <!-- DASHBOARD -->
   <section id="tab-dash" class="active">
     <div class="card">
-      <h2>概览（USD 折算）</h2>
+      <h2>概览（USD）</h2>
       <div class="grid grid-3">
         <div class="stat"><div class="label">本月收入</div><div class="value pos" id="s-month"></div><div class="sub" id="s-month-sub"></div></div>
         <div class="stat"><div class="label">YTD 收入</div><div class="value pos" id="s-ytd"></div></div>
@@ -126,47 +128,41 @@ tr:last-child td{border-bottom:none;}
     </div>
   </section>
 
-  <!-- ENTRY -->
+  <!-- ENTRY (monthly grid) -->
   <section id="tab-entry">
     <div class="card">
-      <h2>记一笔</h2>
-      <div class="type-switch" id="entry-type">
-        <button data-type="income" class="active">收入</button>
-        <button data-type="principal">本金变动</button>
-        <button data-type="jepq">JEPQ 定投</button>
+      <div class="month-head">
+        <h2 style="margin:0;">月度录入</h2>
+        <label style="margin:0;flex:0 0 auto;">月份
+          <input type="month" id="entry-month">
+        </label>
+        <span id="entry-flash" class="saved-flash">已保存</span>
+      </div>
+      <p class="hint">在下表里一次性填完本月所有渠道的收入和本金变动。本金变动：<b>正数=新增投入</b>、<b>负数=赎回</b>、留空表示本月无变动。</p>
+
+      <div style="overflow-x:auto;">
+        <table class="entry-grid" id="entry-table">
+          <thead><tr>
+            <th>渠道</th>
+            <th class="num">本月收入 (USD)</th>
+            <th class="num">本金变动 (USD)</th>
+            <th>备注</th>
+          </tr></thead>
+          <tbody id="entry-rows"></tbody>
+        </table>
       </div>
 
-      <form id="entry-form">
-        <label id="lbl-channel">渠道
-          <select name="channel_id"></select>
-        </label>
+      <label style="max-width:320px;">JEPQ 本月定投金额 (USD)
+        <input type="number" id="entry-jepq" step="0.01" min="0" placeholder="0">
+      </label>
+      <label style="max-width:320px;">JEPQ 备注（可选）
+        <input type="text" id="entry-jepq-note" placeholder="">
+      </label>
 
-        <div class="row">
-          <label>日期<input type="date" name="date" required></label>
-          <label id="lbl-direction" style="display:none;">方向
-            <select name="direction"><option value="in">投入</option><option value="out">赎回</option></select>
-          </label>
-        </div>
-
-        <div class="row">
-          <label>金额<input type="number" name="amount" step="0.01" min="0" required></label>
-          <label>货币
-            <select name="currency" id="cur-sel"></select>
-          </label>
-        </div>
-
-        <label>汇率（1 <span id="cur-label">USD</span> = ? USD）
-          <input type="number" name="fx_rate" step="0.0001" min="0" required>
-          <span class="hint">默认使用设置里的汇率，可按需覆盖</span>
-        </label>
-
-        <label>备注（可选）<input type="text" name="note" placeholder="例如：腾讯 2024 年中期派息"></label>
-
-        <div class="actions">
-          <button type="submit" class="btn">保存</button>
-          <button type="reset" class="btn ghost">清空</button>
-        </div>
-      </form>
+      <div class="actions">
+        <button class="btn" id="entry-save">保存本月数据</button>
+        <button class="btn ghost" id="entry-reset">重新加载本月</button>
+      </div>
     </div>
   </section>
 
@@ -203,7 +199,7 @@ tr:last-child td{border-bottom:none;}
         <button data-list="jepq">JEPQ</button>
       </div>
       <div class="filters">
-        <input type="month" id="f-month" placeholder="按月筛选">
+        <input type="month" id="f-month">
         <select id="f-channel"><option value="">全部渠道</option></select>
         <button class="btn ghost small" id="f-clear">清除筛选</button>
       </div>
@@ -216,15 +212,6 @@ tr:last-child td{border-bottom:none;}
   <!-- SETTINGS -->
   <section id="tab-settings">
     <div class="card">
-      <h2>汇率（转 USD）</h2>
-      <div class="fx-grid" id="fx-grid"></div>
-      <div class="actions">
-        <button class="btn" id="fx-save">保存汇率</button>
-        <button class="btn ghost" id="fx-add">新增币种</button>
-      </div>
-      <p class="hint">汇率变动只影响「未来」录入时的默认值；已录入的条目保留当时填写的汇率，不会被改动。</p>
-    </div>
-    <div class="card">
       <h2>数据备份</h2>
       <div class="actions">
         <button class="btn ghost" id="btn-export">导出 JSON</button>
@@ -232,6 +219,7 @@ tr:last-child td{border-bottom:none;}
         <input type="file" id="file-import" accept="application/json" style="display:none;">
         <button class="btn danger" id="btn-clear">清空全部数据</button>
       </div>
+      <p class="hint">所有数据存在浏览器的 localStorage 里。换机器或清缓存前记得导出。</p>
     </div>
   </section>
 </main>
@@ -240,8 +228,7 @@ tr:last-child td{border-bottom:none;}
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 
 // ===== Storage =====
-const KEYS={channels:'studio_channels',principals:'studio_principals',incomes:'studio_incomes',jepq:'studio_jepq',fx:'studio_fx'};
-const DEFAULT_FX={USD:1,USDT:1,CNY:0.14,HKD:0.128,EUR:1.08};
+const KEYS={channels:'studio_channels',incomes:'studio_incomes',principals:'studio_principals',jepq:'studio_jepq'};
 const DEFAULT_CHANNELS=[
   {id:'ch-div',name:'股息',category:'股息',requires_principal:true,active:true},
   {id:'ch-ipo',name:'港股打新',category:'港股打新',requires_principal:true,active:true},
@@ -253,20 +240,40 @@ const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 
 let channels=load(KEYS.channels,null);
 if(!channels){channels=DEFAULT_CHANNELS;save(KEYS.channels,channels);}
-let principals=load(KEYS.principals,[]);
 let incomes=load(KEYS.incomes,[]);
+let principals=load(KEYS.principals,[]);
 let jepq=load(KEYS.jepq,[]);
-let fx=load(KEYS.fx,DEFAULT_FX);
+
+// --- v1 → v2 migration (old records had date+currency+fx_rate+direction) ---
+function migrate(){
+  let changed=false;
+  const migIncome=(a)=>a.map(x=>x.month?x:({
+    id:x.id,channel_id:x.channel_id,month:(x.date||'').slice(0,7),
+    amount:(+x.amount)*(+x.fx_rate||1),note:x.note||''
+  }));
+  const migPrin=(a)=>a.map(x=>x.month?x:({
+    id:x.id,channel_id:x.channel_id,month:(x.date||'').slice(0,7),
+    amount:(+x.amount)*(+x.fx_rate||1)*(x.direction==='out'?-1:1),note:x.note||''
+  }));
+  const migJepq=(a)=>a.map(x=>x.month?x:({
+    id:x.id,month:(x.date||'').slice(0,7),amount:+x.amount||0,note:x.note||''
+  }));
+  if(incomes.some(x=>x.month===undefined)){incomes=migIncome(incomes);changed=true;}
+  if(principals.some(x=>x.month===undefined)){principals=migPrin(principals);changed=true;}
+  if(jepq.some(x=>x.month===undefined)){jepq=migJepq(jepq);changed=true;}
+  if(changed){save(KEYS.incomes,incomes);save(KEYS.principals,principals);save(KEYS.jepq,jepq);}
+  // also drop deprecated FX setting
+  localStorage.removeItem('studio_fx');
+}
+migrate();
 
 // ===== Utils =====
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const todayStr=()=>new Date().toISOString().slice(0,10);
-const monthStr=(d)=>(d||todayStr()).slice(0,7);
-const thisMonth=monthStr();
+const nowMonth=()=>new Date().toISOString().slice(0,7);
+const thisMonth=nowMonth();
 const thisYear=thisMonth.slice(0,4);
-const toUSD=(amt,rate)=>(+amt)*(+rate);
 const fmtUSD=(n)=>'$'+(+n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fmtPct=(n)=>{if(!isFinite(n))return '—';return (n*100).toFixed(1)+'%';};
+const fmtPct=(n)=>isFinite(n)?(n*100).toFixed(1)+'%':'—';
 const channelById=(id)=>channels.find(c=>c.id===id);
 
 // ===== Tabs =====
@@ -275,101 +282,81 @@ document.getElementById('tabs').addEventListener('click',e=>{
   document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));
   document.querySelectorAll('main > section').forEach(s=>s.classList.toggle('active',s.id==='tab-'+b.dataset.tab));
   if(b.dataset.tab==='dash')renderDash();
+  if(b.dataset.tab==='entry')renderEntry();
   if(b.dataset.tab==='channels')renderChannels();
   if(b.dataset.tab==='detail')renderDetail();
-  if(b.dataset.tab==='settings')renderFx();
 });
 
-// ===== Entry form =====
-const entryForm=document.getElementById('entry-form');
-const entryType=document.getElementById('entry-type');
-let curType='income';
+// ===== Monthly Entry =====
+const entryMonthInp=document.getElementById('entry-month');
+entryMonthInp.value=thisMonth;
+entryMonthInp.addEventListener('change',renderEntry);
+document.getElementById('entry-reset').addEventListener('click',renderEntry);
+document.getElementById('entry-save').addEventListener('click',saveEntry);
 
-function syncFxDefault(){
-  const cur=entryForm.currency.value;
-  document.getElementById('cur-label').textContent=cur;
-  entryForm.fx_rate.value=fx[cur]??1;
+function renderEntry(){
+  const m=entryMonthInp.value||thisMonth;
+  const tbody=document.getElementById('entry-rows');
+  const findInc=(chId)=>incomes.find(x=>x.channel_id===chId&&x.month===m);
+  const findPrin=(chId)=>principals.find(x=>x.channel_id===chId&&x.month===m);
+  const activeCh=channels.filter(c=>c.active);
+  tbody.innerHTML=activeCh.map(c=>{
+    const inc=findInc(c.id),pri=findPrin(c.id);
+    const note=[inc?.note,pri?.note].filter(Boolean)[0]||'';
+    return `<tr data-ch="${c.id}">
+      <td class="ch">${c.name}${c.requires_principal?'':'<span class="pill">无本金</span>'}</td>
+      <td class="num"><input type="number" step="0.01" class="f-inc" value="${inc?inc.amount:''}" placeholder="0"></td>
+      <td class="num"><input type="number" step="0.01" class="f-pri" value="${pri?pri.amount:''}" placeholder="0" ${c.requires_principal?'':'disabled'}></td>
+      <td><input type="text" class="note f-note" value="${note.replace(/"/g,'&quot;')}" placeholder="备注"></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="4" class="empty">没有启用的渠道</td></tr>';
+  const jRec=jepq.find(x=>x.month===m);
+  document.getElementById('entry-jepq').value=jRec?jRec.amount:'';
+  document.getElementById('entry-jepq-note').value=jRec?.note||'';
 }
-function refreshChannelSelect(){
-  const sel=entryForm.channel_id;
-  sel.innerHTML=channels.filter(c=>c.active).map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-  document.getElementById('f-channel').innerHTML='<option value="">全部渠道</option>'+channels.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-}
-function refreshCurrencySelect(){
-  const sel=document.getElementById('cur-sel');
-  const cur=sel.value;
-  sel.innerHTML=Object.keys(fx).map(c=>`<option>${c}</option>`).join('');
-  sel.value=cur&&fx[cur]?cur:'USD';
-  syncFxDefault();
-}
-function updateEntryFormShape(){
-  const lblCh=document.getElementById('lbl-channel');
-  const lblDir=document.getElementById('lbl-direction');
-  if(curType==='jepq'){
-    lblCh.style.display='none';
-    lblDir.style.display='none';
-    entryForm.currency.value='USD';
-    syncFxDefault();
-  }else if(curType==='principal'){
-    lblCh.style.display='';
-    lblDir.style.display='';
-  }else{
-    lblCh.style.display='';
-    lblDir.style.display='none';
-  }
-}
-entryType.addEventListener('click',e=>{
-  const b=e.target.closest('button[data-type]');if(!b)return;
-  curType=b.dataset.type;
-  document.querySelectorAll('#entry-type button').forEach(x=>x.classList.toggle('active',x===b));
-  updateEntryFormShape();
-});
-entryForm.currency.addEventListener('change',syncFxDefault);
-entryForm.date.value=todayStr();
 
-entryForm.addEventListener('submit',e=>{
-  e.preventDefault();
-  const f=new FormData(entryForm);
-  const amount=parseFloat(f.get('amount'));
-  const fx_rate=parseFloat(f.get('fx_rate'));
-  if(!(amount>=0)||!(fx_rate>0)){alert('请检查金额和汇率');return;}
-  const base={id:uid(),date:f.get('date'),amount,currency:f.get('currency'),fx_rate,note:f.get('note')||''};
-  if(curType==='income'){
-    incomes.push({...base,channel_id:f.get('channel_id')});
-    save(KEYS.incomes,incomes);
-  }else if(curType==='principal'){
-    principals.push({...base,channel_id:f.get('channel_id'),direction:f.get('direction')});
-    save(KEYS.principals,principals);
-  }else{
-    jepq.push({id:base.id,date:base.date,amount:base.amount,currency:'USD',fx_rate:1,note:base.note});
-    save(KEYS.jepq,jepq);
-  }
-  entryForm.reset();
-  entryForm.date.value=todayStr();
-  refreshCurrencySelect();
-  updateEntryFormShape();
-  renderDash();
-  alert('已保存');
-});
+function upsert(arr,match,record){
+  const i=arr.findIndex(match);
+  if(record==null){if(i>=0)arr.splice(i,1);return;}
+  if(i>=0)arr[i]={...arr[i],...record};
+  else arr.push({id:uid(),...record});
+}
+function saveEntry(){
+  const m=entryMonthInp.value||thisMonth;
+  document.querySelectorAll('#entry-rows tr[data-ch]').forEach(tr=>{
+    const chId=tr.dataset.ch;
+    const incV=tr.querySelector('.f-inc').value.trim();
+    const priV=tr.querySelector('.f-pri').value.trim();
+    const note=tr.querySelector('.f-note').value.trim();
+    if(incV==='')upsert(incomes,x=>x.channel_id===chId&&x.month===m,null);
+    else upsert(incomes,x=>x.channel_id===chId&&x.month===m,{channel_id:chId,month:m,amount:+incV,note});
+    if(priV==='')upsert(principals,x=>x.channel_id===chId&&x.month===m,null);
+    else upsert(principals,x=>x.channel_id===chId&&x.month===m,{channel_id:chId,month:m,amount:+priV,note});
+  });
+  const jV=document.getElementById('entry-jepq').value.trim();
+  const jNote=document.getElementById('entry-jepq-note').value.trim();
+  if(jV==='')upsert(jepq,x=>x.month===m,null);
+  else upsert(jepq,x=>x.month===m,{month:m,amount:+jV,note:jNote});
+  save(KEYS.incomes,incomes);save(KEYS.principals,principals);save(KEYS.jepq,jepq);
+  const flash=document.getElementById('entry-flash');flash.classList.remove('show');void flash.offsetWidth;flash.classList.add('show');
+  renderEntry();
+}
 
 // ===== Dashboard =====
-function sumUSD(arr,filter){
-  return arr.filter(filter).reduce((s,x)=>s+toUSD(x.amount,x.fx_rate),0);
-}
 function principalForChannel(chId,asOfMonth){
-  // asOfMonth like "2026-04" means up to end of that month; null = all time
-  return principals.filter(p=>p.channel_id===chId && (!asOfMonth||p.date<=asOfMonth+'-31'))
-    .reduce((s,p)=>s+toUSD(p.amount,p.fx_rate)*(p.direction==='in'?1:-1),0);
+  return principals.filter(p=>p.channel_id===chId&&(!asOfMonth||p.month<=asOfMonth))
+    .reduce((s,p)=>s+(+p.amount||0),0);
 }
 function renderDash(){
-  const monthInc=sumUSD(incomes,x=>monthStr(x.date)===thisMonth);
-  const ytdInc=sumUSD(incomes,x=>x.date.startsWith(thisYear));
-  const totalPrincipal=channels.filter(c=>c.requires_principal).reduce((s,c)=>s+Math.max(0,principalForChannel(c.id,thisMonth)),0);
+  const monthInc=incomes.filter(x=>x.month===thisMonth).reduce((s,x)=>s+(+x.amount||0),0);
+  const ytdInc=incomes.filter(x=>x.month.startsWith(thisYear)).reduce((s,x)=>s+(+x.amount||0),0);
+  const totalPrincipal=channels.filter(c=>c.requires_principal)
+    .reduce((s,c)=>s+Math.max(0,principalForChannel(c.id,thisMonth)),0);
   const apy=totalPrincipal>0?(monthInc*12/totalPrincipal):NaN;
-  const jepqTotal=jepq.reduce((s,x)=>s+x.amount,0);
-  const jepqMonth=jepq.filter(x=>monthStr(x.date)===thisMonth).reduce((s,x)=>s+x.amount,0);
-  const principalAdd=principals.filter(p=>monthStr(p.date)===thisMonth).reduce((s,p)=>s+toUSD(p.amount,p.fx_rate)*(p.direction==='in'?1:-1),0);
-  const net=monthInc-jepqMonth-Math.max(0,principalAdd);
+  const jepqTotal=jepq.reduce((s,x)=>s+(+x.amount||0),0);
+  const jepqMonth=jepq.filter(x=>x.month===thisMonth).reduce((s,x)=>s+(+x.amount||0),0);
+  const principalAddMonth=principals.filter(p=>p.month===thisMonth).reduce((s,p)=>s+(+p.amount||0),0);
+  const net=monthInc-jepqMonth-Math.max(0,principalAddMonth);
 
   document.getElementById('s-month').textContent=fmtUSD(monthInc);
   document.getElementById('s-month-sub').textContent=thisMonth;
@@ -384,15 +371,14 @@ function renderDash(){
   netEl.textContent=fmtUSD(net);
   netEl.className='value '+(net>=0?'pos':'neg');
 
-  // per-channel
   const box=document.getElementById('dash-channels');
-  const rows=channels.filter(c=>c.active).map(c=>{
+  box.innerHTML=channels.filter(c=>c.active).map(c=>{
     const p=principalForChannel(c.id,thisMonth);
-    const mInc=sumUSD(incomes,x=>x.channel_id===c.id&&monthStr(x.date)===thisMonth);
-    const ytd=sumUSD(incomes,x=>x.channel_id===c.id&&x.date.startsWith(thisYear));
+    const mInc=incomes.filter(x=>x.channel_id===c.id&&x.month===thisMonth).reduce((s,x)=>s+(+x.amount||0),0);
+    const ytd=incomes.filter(x=>x.channel_id===c.id&&x.month.startsWith(thisYear)).reduce((s,x)=>s+(+x.amount||0),0);
     const a=(c.requires_principal&&p>0)?mInc*12/p:NaN;
     return `<div class="channel-row">
-      <div><div class="name">${c.name}</div><span class="pill">${c.category}</span>${c.requires_principal?'':' <span class="pill">无本金</span>'}</div>
+      <div><span class="name">${c.name}</span><span class="pill">${c.category}</span>${c.requires_principal?'':'<span class="pill">无本金</span>'}</div>
       <div class="stats">
         <span>本金 <b>${fmtUSD(p)}</b></span>
         <span>本月 <b>${fmtUSD(mInc)}</b></span>
@@ -400,8 +386,7 @@ function renderDash(){
         <span>年化 <b>${c.requires_principal?fmtPct(a):'—'}</b></span>
       </div>
     </div>`;
-  }).join('');
-  box.innerHTML=rows||'<div class="empty">还没有启用的渠道</div>';
+  }).join('')||'<div class="empty">还没有启用的渠道</div>';
 }
 
 // ===== Channels =====
@@ -410,7 +395,7 @@ function renderChannels(){
   box.innerHTML=channels.map(c=>{
     const p=principalForChannel(c.id,thisMonth);
     return `<div class="channel-row">
-      <div><div class="name">${c.name}</div>
+      <div><span class="name">${c.name}</span>
         <span class="pill">${c.category}</span>
         ${c.requires_principal?'<span class="pill">需本金</span>':'<span class="pill">无本金</span>'}
         ${c.active?'':'<span class="pill">已停用</span>'}
@@ -436,7 +421,7 @@ document.getElementById('channel-list').addEventListener('click',e=>{
     channels=channels.filter(x=>x.id!==c.id);
   }
   save(KEYS.channels,channels);
-  refreshChannelSelect();renderChannels();
+  refreshChannelFilter();renderChannels();
 });
 document.getElementById('channel-form').addEventListener('submit',e=>{
   e.preventDefault();
@@ -444,8 +429,11 @@ document.getElementById('channel-form').addEventListener('submit',e=>{
   channels.push({id:'ch-'+uid(),name:f.get('name').trim(),category:f.get('category'),requires_principal:f.get('requires_principal')==='on',active:true});
   save(KEYS.channels,channels);
   e.target.reset();
-  refreshChannelSelect();renderChannels();
+  refreshChannelFilter();renderChannels();
 });
+function refreshChannelFilter(){
+  document.getElementById('f-channel').innerHTML='<option value="">全部渠道</option>'+channels.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+}
 
 // ===== Detail =====
 let curList='incomes';
@@ -463,30 +451,31 @@ document.getElementById('f-clear').addEventListener('click',()=>{document.getEle
 function renderDetail(){
   const m=document.getElementById('f-month').value;
   const ch=document.getElementById('f-channel').value;
-  const filt=(x)=>(!m||monthStr(x.date)===m)&&(!ch||x.channel_id===ch);
-  const rowsIncome=incomes.filter(filt).sort((a,b)=>b.date.localeCompare(a.date));
-  const rowsPrin=principals.filter(filt).sort((a,b)=>b.date.localeCompare(a.date));
-  const rowsJepq=jepq.filter(x=>!m||monthStr(x.date)===m).sort((a,b)=>b.date.localeCompare(a.date));
+  const filt=(x)=>(!m||x.month===m)&&(!ch||x.channel_id===ch);
+  const sortDesc=(a,b)=>b.month.localeCompare(a.month);
+  const incRows=incomes.filter(filt).sort(sortDesc);
+  const priRows=principals.filter(filt).sort(sortDesc);
+  const jpRows=jepq.filter(x=>!m||x.month===m).sort(sortDesc);
 
-  document.getElementById('list-incomes').innerHTML=rowsIncome.length?tableHTML(
-    ['日期','渠道','金额','USD','备注',''],
-    rowsIncome.map(r=>[r.date,channelById(r.channel_id)?.name||'—',`${r.amount} ${r.currency}`,fmtUSD(toUSD(r.amount,r.fx_rate)),r.note||'',delBtn('incomes',r.id)])
+  document.getElementById('list-incomes').innerHTML=incRows.length?tableHTML(
+    ['月份','渠道','金额 USD','备注',''],
+    incRows.map(r=>[r.month,channelById(r.channel_id)?.name||'—',fmtUSD(r.amount),r.note||'',delBtn('incomes',r.id)])
   ):'<div class="empty">无记录</div>';
 
-  document.getElementById('list-principals').innerHTML=rowsPrin.length?tableHTML(
-    ['日期','渠道','方向','金额','USD','备注',''],
-    rowsPrin.map(r=>[r.date,channelById(r.channel_id)?.name||'—',r.direction==='in'?'投入':'赎回',`${r.amount} ${r.currency}`,fmtUSD(toUSD(r.amount,r.fx_rate)*(r.direction==='in'?1:-1)),r.note||'',delBtn('principals',r.id)])
+  document.getElementById('list-principals').innerHTML=priRows.length?tableHTML(
+    ['月份','渠道','金额 USD','备注',''],
+    priRows.map(r=>[r.month,channelById(r.channel_id)?.name||'—',fmtUSD(r.amount),r.note||'',delBtn('principals',r.id)])
   ):'<div class="empty">无记录</div>';
 
-  document.getElementById('list-jepq').innerHTML=rowsJepq.length?tableHTML(
-    ['日期','金额 USD','备注',''],
-    rowsJepq.map(r=>[r.date,fmtUSD(r.amount),r.note||'',delBtn('jepq',r.id)])
+  document.getElementById('list-jepq').innerHTML=jpRows.length?tableHTML(
+    ['月份','金额 USD','备注',''],
+    jpRows.map(r=>[r.month,fmtUSD(r.amount),r.note||'',delBtn('jepq',r.id)])
   ):'<div class="empty">无记录</div>';
 }
 function tableHTML(heads,rows){
-  const isNum=(i,h)=>['金额','USD','金额 USD'].includes(h);
-  return `<table><thead><tr>${heads.map((h,i)=>`<th class="${isNum(i,h)?'num':''}">${h}</th>`).join('')}</tr></thead><tbody>${
-    rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${isNum(i,heads[i])?'num':''}">${c}</td>`).join('')}</tr>`).join('')
+  const numCols=new Set(['金额 USD']);
+  return `<table><thead><tr>${heads.map(h=>`<th class="${numCols.has(h)?'num':''}">${h}</th>`).join('')}</tr></thead><tbody>${
+    rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${numCols.has(heads[i])?'num':''}">${c}</td>`).join('')}</tr>`).join('')
   }</tbody></table>`;
 }
 function delBtn(kind,id){return `<button class="inline-del" data-del="${kind}" data-id="${id}">删除</button>`;}
@@ -500,34 +489,13 @@ document.querySelectorAll('.sub-list').forEach(el=>el.addEventListener('click',e
   renderDetail();
 }));
 
-// ===== Settings / FX =====
-function renderFx(){
-  const g=document.getElementById('fx-grid');
-  g.innerHTML=Object.entries(fx).map(([k,v])=>`
-    <label>${k}<input type="number" step="0.0001" min="0" data-fx="${k}" value="${v}" ${k==='USD'?'disabled':''}></label>
-  `).join('');
-}
-document.getElementById('fx-save').addEventListener('click',()=>{
-  document.querySelectorAll('#fx-grid input[data-fx]').forEach(i=>{
-    const v=parseFloat(i.value);if(v>0)fx[i.dataset.fx]=v;
-  });
-  save(KEYS.fx,fx);refreshCurrencySelect();alert('汇率已保存');
-});
-document.getElementById('fx-add').addEventListener('click',()=>{
-  const code=(prompt('币种代码，如 JPY / GBP')||'').trim().toUpperCase();
-  if(!code||fx[code])return;
-  const rate=parseFloat(prompt(`1 ${code} = ? USD`));
-  if(!(rate>0))return;
-  fx[code]=rate;save(KEYS.fx,fx);renderFx();refreshCurrencySelect();
-});
-
 // ===== Backup =====
 document.getElementById('btn-export').addEventListener('click',()=>{
-  const data={channels,principals,incomes,jepq,fx,exported_at:new Date().toISOString()};
+  const data={channels,incomes,principals,jepq,exported_at:new Date().toISOString(),version:2};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=`studio-backup-${todayStr()}.json`;
+  a.download=`studio-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();URL.revokeObjectURL(a.href);
 });
 document.getElementById('btn-import').addEventListener('click',()=>document.getElementById('file-import').click());
@@ -539,12 +507,12 @@ document.getElementById('file-import').addEventListener('change',e=>{
       const d=JSON.parse(r.result);
       if(!confirm('导入会覆盖当前数据，确认继续？'))return;
       if(Array.isArray(d.channels))channels=d.channels;
-      if(Array.isArray(d.principals))principals=d.principals;
       if(Array.isArray(d.incomes))incomes=d.incomes;
+      if(Array.isArray(d.principals))principals=d.principals;
       if(Array.isArray(d.jepq))jepq=d.jepq;
-      if(d.fx&&typeof d.fx==='object')fx=d.fx;
-      save(KEYS.channels,channels);save(KEYS.principals,principals);save(KEYS.incomes,incomes);save(KEYS.jepq,jepq);save(KEYS.fx,fx);
-      refreshChannelSelect();refreshCurrencySelect();renderDash();renderChannels();renderDetail();renderFx();
+      save(KEYS.channels,channels);save(KEYS.incomes,incomes);save(KEYS.principals,principals);save(KEYS.jepq,jepq);
+      migrate();
+      refreshChannelFilter();renderDash();renderChannels();renderDetail();renderEntry();
       alert('已导入');
     }catch(err){alert('文件格式不对：'+err.message);}
   };
@@ -553,15 +521,13 @@ document.getElementById('file-import').addEventListener('change',e=>{
 document.getElementById('btn-clear').addEventListener('click',()=>{
   if(!confirm('将清空所有记录和自定义渠道，此操作不可撤销。确认？'))return;
   if(!confirm('再次确认：真的清空全部数据？'))return;
-  localStorage.removeItem(KEYS.channels);localStorage.removeItem(KEYS.principals);
-  localStorage.removeItem(KEYS.incomes);localStorage.removeItem(KEYS.jepq);localStorage.removeItem(KEYS.fx);
+  Object.values(KEYS).forEach(k=>localStorage.removeItem(k));
   location.reload();
 });
 
 // ===== Init =====
-refreshChannelSelect();
-refreshCurrencySelect();
-updateEntryFormShape();
+refreshChannelFilter();
+renderEntry();
 renderDash();
 </script>
 </body>
