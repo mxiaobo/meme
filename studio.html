@@ -138,14 +138,14 @@ table.entry-grid input.note{font-size:.8rem;}
         </label>
         <span id="entry-flash" class="saved-flash">已保存</span>
       </div>
-      <p class="hint">在下表里一次性填完本月所有渠道的收入和本金变动。本金变动：<b>正数=新增投入</b>、<b>负数=赎回</b>、留空表示本月无变动。</p>
+      <p class="hint">在下表里一次性填完本月各渠道的收入和本金。<b>本金 = 月末账户余额</b>，切换月份时会自动带出最近一次的本金，不变就直接保存即可。</p>
 
       <div style="overflow-x:auto;">
         <table class="entry-grid" id="entry-table">
           <thead><tr>
             <th>渠道</th>
             <th class="num">本月收入 (USD)</th>
-            <th class="num">本金变动 (USD)</th>
+            <th class="num">本金 (USD)</th>
             <th>备注</th>
           </tr></thead>
           <tbody id="entry-rows"></tbody>
@@ -244,9 +244,10 @@ let incomes=load(KEYS.incomes,[]);
 let principals=load(KEYS.principals,[]);
 let jepq=load(KEYS.jepq,[]);
 
-// --- v1 → v2 migration (old records had date+currency+fx_rate+direction) ---
+// --- migrations ---
+const DATA_VERSION=3;
 function migrate(){
-  let changed=false;
+  // v1 → v2: drop date+currency+fx_rate+direction → month+amount(USD); deltas
   const migIncome=(a)=>a.map(x=>x.month?x:({
     id:x.id,channel_id:x.channel_id,month:(x.date||'').slice(0,7),
     amount:(+x.amount)*(+x.fx_rate||1),note:x.note||''
@@ -258,12 +259,24 @@ function migrate(){
   const migJepq=(a)=>a.map(x=>x.month?x:({
     id:x.id,month:(x.date||'').slice(0,7),amount:+x.amount||0,note:x.note||''
   }));
-  if(incomes.some(x=>x.month===undefined)){incomes=migIncome(incomes);changed=true;}
-  if(principals.some(x=>x.month===undefined)){principals=migPrin(principals);changed=true;}
-  if(jepq.some(x=>x.month===undefined)){jepq=migJepq(jepq);changed=true;}
-  if(changed){save(KEYS.incomes,incomes);save(KEYS.principals,principals);save(KEYS.jepq,jepq);}
-  // also drop deprecated FX setting
+  if(incomes.some(x=>x.month===undefined)){incomes=migIncome(incomes);save(KEYS.incomes,incomes);}
+  if(principals.some(x=>x.month===undefined)){principals=migPrin(principals);save(KEYS.principals,principals);}
+  if(jepq.some(x=>x.month===undefined)){jepq=migJepq(jepq);save(KEYS.jepq,jepq);}
+  // v2 → v3: principal records change semantic from monthly delta to absolute balance
+  const v=+localStorage.getItem('studio_v')||1;
+  if(v<3){
+    const byCh={};
+    principals.forEach(p=>(byCh[p.channel_id]=byCh[p.channel_id]||[]).push(p));
+    const out=[];
+    Object.values(byCh).forEach(arr=>{
+      arr.sort((a,b)=>a.month.localeCompare(b.month));
+      let bal=0;
+      arr.forEach(r=>{bal+=+r.amount||0;out.push({...r,amount:bal});});
+    });
+    principals=out;save(KEYS.principals,principals);
+  }
   localStorage.removeItem('studio_fx');
+  localStorage.setItem('studio_v',DATA_VERSION);
 }
 migrate();
 
@@ -294,6 +307,11 @@ entryMonthInp.addEventListener('change',renderEntry);
 document.getElementById('entry-reset').addEventListener('click',renderEntry);
 document.getElementById('entry-save').addEventListener('click',saveEntry);
 
+function latestPrincipalAsOf(chId,month){
+  const recs=principals.filter(p=>p.channel_id===chId&&p.month<=month);
+  if(!recs.length)return undefined;
+  return recs.sort((a,b)=>b.month.localeCompare(a.month))[0].amount;
+}
 function renderEntry(){
   const m=entryMonthInp.value||thisMonth;
   const tbody=document.getElementById('entry-rows');
@@ -302,17 +320,25 @@ function renderEntry(){
   const activeCh=channels.filter(c=>c.active);
   tbody.innerHTML=activeCh.map(c=>{
     const inc=findInc(c.id),pri=findPrin(c.id);
+    // principal default: exact match if exists; otherwise carry forward from latest prior month
+    const carried=latestPrincipalAsOf(c.id,prevMonth(m));
+    const priVal=pri?pri.amount:(carried!==undefined?carried:'');
     const note=[inc?.note,pri?.note].filter(Boolean)[0]||'';
     return `<tr data-ch="${c.id}">
       <td class="ch">${c.name}${c.requires_principal?'':'<span class="pill">无本金</span>'}</td>
       <td class="num"><input type="number" step="0.01" class="f-inc" value="${inc?inc.amount:''}" placeholder="0"></td>
-      <td class="num"><input type="number" step="0.01" class="f-pri" value="${pri?pri.amount:''}" placeholder="0" ${c.requires_principal?'':'disabled'}></td>
+      <td class="num"><input type="number" step="0.01" class="f-pri" value="${priVal}" placeholder="0" ${c.requires_principal?'':'disabled'}></td>
       <td><input type="text" class="note f-note" value="${note.replace(/"/g,'&quot;')}" placeholder="备注"></td>
     </tr>`;
   }).join('')||'<tr><td colspan="4" class="empty">没有启用的渠道</td></tr>';
   const jRec=jepq.find(x=>x.month===m);
   document.getElementById('entry-jepq').value=jRec?jRec.amount:'';
   document.getElementById('entry-jepq-note').value=jRec?.note||'';
+}
+function prevMonth(m){
+  const [y,mo]=m.split('-').map(Number);
+  const d=new Date(y,mo-2,1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
 }
 
 function upsert(arr,match,record){
@@ -344,8 +370,13 @@ function saveEntry(){
 
 // ===== Dashboard =====
 function principalForChannel(chId,asOfMonth){
-  return principals.filter(p=>p.channel_id===chId&&(!asOfMonth||p.month<=asOfMonth))
-    .reduce((s,p)=>s+(+p.amount||0),0);
+  return latestPrincipalAsOf(chId,asOfMonth||thisMonth)??0;
+}
+function principalChangeInMonth(chId,month){
+  const cur=latestPrincipalAsOf(chId,month);
+  if(cur===undefined)return 0;
+  const prev=latestPrincipalAsOf(chId,prevMonth(month));
+  return cur-(prev??0);
 }
 function renderDash(){
   const monthInc=incomes.filter(x=>x.month===thisMonth).reduce((s,x)=>s+(+x.amount||0),0);
@@ -355,7 +386,8 @@ function renderDash(){
   const apy=totalPrincipal>0?(monthInc*12/totalPrincipal):NaN;
   const jepqTotal=jepq.reduce((s,x)=>s+(+x.amount||0),0);
   const jepqMonth=jepq.filter(x=>x.month===thisMonth).reduce((s,x)=>s+(+x.amount||0),0);
-  const principalAddMonth=principals.filter(p=>p.month===thisMonth).reduce((s,p)=>s+(+p.amount||0),0);
+  const principalAddMonth=channels.filter(c=>c.requires_principal)
+    .reduce((s,c)=>s+principalChangeInMonth(c.id,thisMonth),0);
   const net=monthInc-jepqMonth-Math.max(0,principalAddMonth);
 
   document.getElementById('s-month').textContent=fmtUSD(monthInc);
