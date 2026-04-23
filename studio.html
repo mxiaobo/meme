@@ -74,6 +74,21 @@ tr:last-child td{border-bottom:none;}
 .channel-row .name{font-weight:500;}
 .channel-row .stats{display:flex;gap:1rem;font-size:.8rem;color:var(--muted);}
 .channel-row .stats b{color:var(--text);font-weight:600;}
+.ch-table{width:100%;font-size:.88rem;}
+.ch-table th{padding:.45rem .5rem;color:var(--muted);font-weight:500;font-size:.75rem;border-bottom:1px solid var(--border);}
+.ch-table td{padding:.6rem .5rem;border-bottom:1px solid var(--border);}
+.ch-table tbody tr:last-child td{border-bottom:none;}
+.chart-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.25rem;}
+.chart-meta{color:var(--muted);font-size:.8rem;margin-bottom:.5rem;}
+.chart-meta b{color:var(--text);font-weight:600;margin-left:.35rem;}
+.year-tabs{display:flex;gap:.25rem;flex-wrap:wrap;}
+.year-tabs button{padding:.3rem .7rem;font-size:.78rem;border:none;border-radius:6px;background:var(--card-2);color:var(--muted);cursor:pointer;font-weight:500;}
+.year-tabs button.active{background:var(--accent);color:#fff;}
+.chart-svg{width:100%;height:auto;display:block;}
+.chart-svg .bar{fill:var(--card-2);transition:fill .15s;}
+.chart-svg .bar-cur{fill:var(--accent);}
+.chart-svg .chart-val{font-size:11px;fill:var(--text);font-weight:600;font-variant-numeric:tabular-nums;}
+.chart-svg .chart-lbl{font-size:11px;fill:var(--muted);}
 .filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem;}
 .filters select,.filters input{width:auto;flex:1;min-width:140px;}
 .empty{text-align:center;color:var(--muted);padding:2rem 1rem;font-size:.9rem;}
@@ -122,8 +137,27 @@ table.entry-grid input.note{font-size:.8rem;}
       </div>
     </div>
     <div class="card">
+      <div class="chart-head">
+        <h2 style="margin:0;">月度收入</h2>
+        <div class="year-tabs" id="year-tabs"></div>
+      </div>
+      <div class="chart-meta"><span id="chart-period-label"></span>合计<b id="chart-total">$0.00</b></div>
+      <div id="chart-canvas"></div>
+    </div>
+    <div class="card">
       <h2>各渠道本月表现</h2>
-      <div id="dash-channels"></div>
+      <div style="overflow-x:auto;">
+        <table class="ch-table">
+          <thead><tr>
+            <th>渠道</th>
+            <th class="num">本金</th>
+            <th class="num">本月</th>
+            <th class="num">YTD</th>
+            <th class="num">年化</th>
+          </tr></thead>
+          <tbody id="dash-channels"></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -408,17 +442,84 @@ function renderDash(){
     const mInc=incomes.filter(x=>x.channel_id===c.id&&x.month===thisMonth).reduce((s,x)=>s+(+x.amount||0),0);
     const ytd=incomes.filter(x=>x.channel_id===c.id&&x.month.startsWith(thisYear)).reduce((s,x)=>s+(+x.amount||0),0);
     const a=(c.requires_principal&&p>0)?mInc*12/p:NaN;
-    return `<div class="channel-row">
-      <div><span class="name">${c.name}</span></div>
-      <div class="stats">
-        <span>本金 <b>${fmtUSD(p)}</b></span>
-        <span>本月 <b>${fmtUSD(mInc)}</b></span>
-        <span>YTD <b>${fmtUSD(ytd)}</b></span>
-        <span>年化 <b>${c.requires_principal?fmtPct(a):'—'}</b></span>
-      </div>
-    </div>`;
-  }).join('')||'<div class="empty">还没有启用的渠道</div>';
+    return `<tr>
+      <td>${c.name}</td>
+      <td class="num">${fmtUSD(p)}</td>
+      <td class="num">${fmtUSD(mInc)}</td>
+      <td class="num">${fmtUSD(ytd)}</td>
+      <td class="num">${c.requires_principal?fmtPct(a):'—'}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="5" class="empty">还没有启用的渠道</td></tr>';
+  renderChart();
 }
+
+// ===== Monthly income chart =====
+let chartView=thisYear;
+function uniqueYears(){
+  const s=new Set([thisYear]);
+  incomes.forEach(x=>s.add(x.month.slice(0,4)));
+  return [...s].sort();
+}
+function trailing12(endMonth){
+  const [y,mo]=endMonth.split('-').map(Number);
+  const arr=[];
+  for(let i=11;i>=0;i--){
+    const d=new Date(y,mo-1-i,1);
+    arr.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
+  }
+  return arr;
+}
+function fmtShort(n){
+  if(!n)return '';
+  if(n>=1e6)return '$'+(n/1e6).toFixed(1).replace(/\.0$/,'')+'M';
+  if(n>=1e3)return '$'+(n/1e3).toFixed(1).replace(/\.0$/,'')+'k';
+  return '$'+Math.round(n);
+}
+function renderYearTabs(){
+  const tabs=document.getElementById('year-tabs');
+  const yrs=uniqueYears();
+  tabs.innerHTML=yrs.map(y=>`<button data-view="${y}" class="${chartView===y?'active':''}">${y}</button>`).join('')
+    +`<button data-view="trailing" class="${chartView==='trailing'?'active':''}">近 12 月</button>`;
+}
+function renderChart(){
+  renderYearTabs();
+  let monthKeys,periodLabel;
+  if(chartView==='trailing'){
+    monthKeys=trailing12(thisMonth);
+    periodLabel=`${monthKeys[0]} ~ ${monthKeys[11]} `;
+  }else{
+    monthKeys=Array.from({length:12},(_,i)=>`${chartView}-${String(i+1).padStart(2,'0')}`);
+    periodLabel=`${chartView} 年 `;
+  }
+  const totals=monthKeys.map(m=>incomes.filter(x=>x.month===m).reduce((s,x)=>s+(+x.amount||0),0));
+  const max=Math.max(1,...totals);
+  const total=totals.reduce((a,b)=>a+b,0);
+  const W=720,H=240,padL=10,padR=10,padT=28,padB=32;
+  const chartW=W-padL-padR,chartH=H-padT-padB;
+  const step=chartW/monthKeys.length;
+  const barW=step*0.65;
+  const bars=monthKeys.map((m,i)=>{
+    const v=totals[i];
+    const h=(v/max)*chartH;
+    const x=padL+i*step+(step-barW)/2;
+    const y=padT+chartH-h;
+    const cx=padL+i*step+step/2;
+    const isCur=m===thisMonth;
+    return `
+      <text x="${cx}" y="${y-6}" text-anchor="middle" class="chart-val">${fmtShort(v)}</text>
+      <rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="3" class="bar ${isCur?'bar-cur':''}"/>
+      <text x="${cx}" y="${padT+chartH+18}" text-anchor="middle" class="chart-lbl">${+m.slice(5,7)}月</text>`;
+  }).join('');
+  document.getElementById('chart-canvas').innerHTML=
+    `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${bars}</svg>`;
+  document.getElementById('chart-period-label').textContent=periodLabel;
+  document.getElementById('chart-total').textContent=fmtUSD(total);
+}
+document.getElementById('year-tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-view]');if(!b)return;
+  chartView=b.dataset.view;
+  renderChart();
+});
 
 // ===== Channels =====
 function renderChannels(){
