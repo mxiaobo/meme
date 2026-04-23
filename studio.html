@@ -69,7 +69,6 @@ th{font-size:.75rem;color:var(--muted);font-weight:500;}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
 tr:last-child td{border-bottom:none;}
 .muted{color:var(--muted);font-size:.8rem;}
-.pill{display:inline-block;padding:.12rem .5rem;font-size:.7rem;background:var(--card-2);border-radius:999px;color:var(--muted);margin-left:.3rem;}
 .channel-row{display:flex;align-items:center;justify-content:space-between;padding:.7rem 0;border-bottom:1px solid var(--border);gap:.5rem;flex-wrap:wrap;}
 .channel-row:last-child{border-bottom:none;}
 .channel-row .name{font-weight:500;}
@@ -325,7 +324,7 @@ function renderEntry(){
     const priVal=pri?pri.amount:(carried!==undefined?carried:'');
     const note=[inc?.note,pri?.note].filter(Boolean)[0]||'';
     return `<tr data-ch="${c.id}">
-      <td class="ch">${c.name}${c.requires_principal?'':'<span class="pill">无本金</span>'}</td>
+      <td class="ch">${c.name}</td>
       <td class="num"><input type="number" step="0.01" class="f-inc" value="${inc?inc.amount:''}" placeholder="0"></td>
       <td class="num"><input type="number" step="0.01" class="f-pri" value="${priVal}" placeholder="0" ${c.requires_principal?'':'disabled'}></td>
       <td><input type="text" class="note f-note" value="${note.replace(/"/g,'&quot;')}" placeholder="备注"></td>
@@ -410,7 +409,7 @@ function renderDash(){
     const ytd=incomes.filter(x=>x.channel_id===c.id&&x.month.startsWith(thisYear)).reduce((s,x)=>s+(+x.amount||0),0);
     const a=(c.requires_principal&&p>0)?mInc*12/p:NaN;
     return `<div class="channel-row">
-      <div><span class="name">${c.name}</span><span class="pill">${c.category}</span>${c.requires_principal?'':'<span class="pill">无本金</span>'}</div>
+      <div><span class="name">${c.name}</span></div>
       <div class="stats">
         <span>本金 <b>${fmtUSD(p)}</b></span>
         <span>本月 <b>${fmtUSD(mInc)}</b></span>
@@ -427,11 +426,7 @@ function renderChannels(){
   box.innerHTML=channels.map(c=>{
     const p=principalForChannel(c.id,thisMonth);
     return `<div class="channel-row">
-      <div><span class="name">${c.name}</span>
-        <span class="pill">${c.category}</span>
-        ${c.requires_principal?'<span class="pill">需本金</span>':'<span class="pill">无本金</span>'}
-        ${c.active?'':'<span class="pill">已停用</span>'}
-      </div>
+      <div><span class="name">${c.name}</span></div>
       <div class="stats"><span>本金 <b>${fmtUSD(p)}</b></span></div>
       <div>
         <button class="btn ghost small" data-act="toggle" data-id="${c.id}">${c.active?'停用':'启用'}</button>
