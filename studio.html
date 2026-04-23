@@ -75,9 +75,17 @@ tr:last-child td{border-bottom:none;}
 .channel-row .stats{display:flex;gap:1rem;font-size:.8rem;color:var(--muted);}
 .channel-row .stats b{color:var(--text);font-weight:600;}
 .ch-table{width:100%;font-size:.88rem;}
-.ch-table th{padding:.45rem .5rem;color:var(--muted);font-weight:500;font-size:.75rem;border-bottom:1px solid var(--border);}
+.ch-table th{padding:.45rem .5rem;color:var(--muted);font-weight:500;font-size:.75rem;border-bottom:1px solid var(--border);text-align:left;}
+.ch-table th.num{text-align:right;}
 .ch-table td{padding:.6rem .5rem;border-bottom:1px solid var(--border);}
+.ch-table td.actions-cell{text-align:right;white-space:nowrap;}
+.ch-table td.actions-cell button{margin-left:.25rem;}
+.ch-table tr.inactive td{color:var(--muted);}
 .ch-table tbody tr:last-child td{border-bottom:none;}
+.add-row{display:flex;gap:.5rem;align-items:center;margin-top:1rem;flex-wrap:wrap;}
+.add-row input[type="text"]{flex:1;min-width:160px;width:auto;}
+.inline-check{flex-direction:row;align-items:center;gap:.35rem;margin:0;color:var(--text);font-size:.88rem;white-space:nowrap;}
+.inline-check input{width:auto;}
 .chart-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.25rem;}
 .chart-meta{color:var(--muted);font-size:.8rem;margin-bottom:.5rem;}
 .chart-meta b{color:var(--text);font-weight:600;margin-left:.35rem;}
@@ -115,7 +123,6 @@ table.entry-grid input.note{font-size:.8rem;}
   <nav class="tabs" id="tabs">
     <button data-tab="dash" class="active">仪表盘</button>
     <button data-tab="entry">月度录入</button>
-    <button data-tab="channels">渠道</button>
     <button data-tab="detail">明细</button>
     <button data-tab="settings">设置</button>
   </nav>
@@ -198,30 +205,6 @@ table.entry-grid input.note{font-size:.8rem;}
     </div>
   </section>
 
-  <!-- CHANNELS -->
-  <section id="tab-channels">
-    <div class="card">
-      <h2>渠道列表</h2>
-      <div id="channel-list"></div>
-    </div>
-    <div class="card">
-      <h2>新增渠道</h2>
-      <form id="channel-form">
-        <div class="row">
-          <label>名称<input type="text" name="name" required></label>
-          <label>分类
-            <select name="category">
-              <option>股息</option><option>港股打新</option><option>Bitfinex放贷</option>
-              <option>Web3</option><option>其他</option>
-            </select>
-          </label>
-        </div>
-        <label><input type="checkbox" name="requires_principal" checked style="width:auto;margin-right:.4rem;">需要投入本金（参与年化计算）</label>
-        <div class="actions"><button type="submit" class="btn">添加</button></div>
-      </form>
-    </div>
-  </section>
-
   <!-- DETAILS -->
   <section id="tab-detail">
     <div class="card">
@@ -244,6 +227,25 @@ table.entry-grid input.note{font-size:.8rem;}
   <!-- SETTINGS -->
   <section id="tab-settings">
     <div class="card">
+      <h2>渠道</h2>
+      <div style="overflow-x:auto;">
+        <table class="ch-table">
+          <thead><tr>
+            <th>名称</th>
+            <th class="num">本金</th>
+            <th>需本金</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="channel-list"></tbody>
+        </table>
+      </div>
+      <form id="channel-form" class="add-row">
+        <input type="text" name="name" placeholder="新渠道名称" required>
+        <label class="inline-check"><input type="checkbox" name="requires_principal" checked>需本金</label>
+        <button type="submit" class="btn">新增</button>
+      </form>
+    </div>
+    <div class="card">
       <h2>数据备份</h2>
       <div class="actions">
         <button class="btn ghost" id="btn-export">导出 JSON</button>
@@ -262,10 +264,10 @@ if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch
 // ===== Storage =====
 const KEYS={channels:'studio_channels',incomes:'studio_incomes',principals:'studio_principals',jepq:'studio_jepq'};
 const DEFAULT_CHANNELS=[
-  {id:'ch-div',name:'股息',category:'股息',requires_principal:true,active:true},
-  {id:'ch-ipo',name:'港股打新',category:'港股打新',requires_principal:true,active:true},
-  {id:'ch-bfx',name:'Bitfinex 放贷',category:'Bitfinex放贷',requires_principal:true,active:true},
-  {id:'ch-w3',name:'Web3 收入',category:'Web3',requires_principal:false,active:true}
+  {id:'ch-div',name:'股息',requires_principal:true,active:true},
+  {id:'ch-ipo',name:'港股打新',requires_principal:true,active:true},
+  {id:'ch-bfx',name:'Bitfinex 放贷',requires_principal:true,active:true},
+  {id:'ch-w3',name:'Web3 收入',requires_principal:false,active:true}
 ];
 const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch{return d;}};
 const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -328,7 +330,7 @@ document.getElementById('tabs').addEventListener('click',e=>{
   document.querySelectorAll('main > section').forEach(s=>s.classList.toggle('active',s.id==='tab-'+b.dataset.tab));
   if(b.dataset.tab==='dash')renderDash();
   if(b.dataset.tab==='entry')renderEntry();
-  if(b.dataset.tab==='channels')renderChannels();
+  if(b.dataset.tab==='settings')renderChannels();
   if(b.dataset.tab==='detail')renderDetail();
 });
 
@@ -518,16 +520,17 @@ function renderChannels(){
   const box=document.getElementById('channel-list');
   box.innerHTML=channels.map(c=>{
     const p=principalForChannel(c.id,thisMonth);
-    return `<div class="channel-row">
-      <div><span class="name">${c.name}</span></div>
-      <div class="stats"><span>本金 <b>${fmtUSD(p)}</b></span></div>
-      <div>
+    return `<tr${c.active?'':' class="inactive"'}>
+      <td>${c.name}</td>
+      <td class="num">${fmtUSD(p)}</td>
+      <td>${c.requires_principal?'是':'否'}</td>
+      <td class="actions-cell">
         <button class="btn ghost small" data-act="toggle" data-id="${c.id}">${c.active?'停用':'启用'}</button>
         <button class="btn ghost small" data-act="rename" data-id="${c.id}">改名</button>
         <button class="btn ghost small" data-act="del" data-id="${c.id}">删除</button>
-      </div>
-    </div>`;
-  }).join('')||'<div class="empty">暂无渠道</div>';
+      </td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="4" class="empty">暂无渠道</td></tr>';
 }
 document.getElementById('channel-list').addEventListener('click',e=>{
   const b=e.target.closest('button[data-act]');if(!b)return;
@@ -546,7 +549,7 @@ document.getElementById('channel-list').addEventListener('click',e=>{
 document.getElementById('channel-form').addEventListener('submit',e=>{
   e.preventDefault();
   const f=new FormData(e.target);
-  channels.push({id:'ch-'+uid(),name:f.get('name').trim(),category:f.get('category'),requires_principal:f.get('requires_principal')==='on',active:true});
+  channels.push({id:'ch-'+uid(),name:f.get('name').trim(),requires_principal:f.get('requires_principal')==='on',active:true});
   save(KEYS.channels,channels);
   e.target.reset();
   refreshChannelFilter();renderChannels();
