@@ -8,27 +8,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0e0f11;
-  --card:#1e1f23;
-  --card-2:#24262b;
-  --border:#2b2d33;
-  --text:#e8e9ea;
-  --muted:#9aa0a6;
-  --accent:#3b82f6;
-  --green:#10b981;
-  --red:#ef4444;
+  --bg:#0a0d13;
+  --card:#141820;
+  --card-2:#1b2029;
+  --border:#242a35;
+  --text:#e6e8ec;
+  --muted:#7e8593;
+  --accent:#ff6838;
+  --up:#ef4f4f;
+  --down:#13a675;
 }
 @media (prefers-color-scheme:light){
   :root{
-    --bg:#f5f7fa;
+    --bg:#f4f5f7;
     --card:#ffffff;
-    --card-2:#f0f2f5;
+    --card-2:#f1f2f5;
     --border:#e4e6eb;
-    --text:#1f2328;
-    --muted:#6b7280;
-    --accent:#2563eb;
-    --green:#059669;
-    --red:#dc2626;
+    --text:#1a1d24;
+    --muted:#6c7380;
+    --accent:#ff6838;
+    --up:#e23a3a;
+    --down:#13a675;
   }
 }
 *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
@@ -49,17 +49,17 @@ section.active{display:block;}
 @media(max-width:600px){.grid-4{grid-template-columns:repeat(2,1fr);}}
 .stat{background:var(--card-2);border-radius:10px;padding:.8rem .9rem;}
 .stat .label{font-size:.75rem;color:var(--muted);margin-bottom:.25rem;}
-.stat .value{font-size:1.2rem;font-weight:600;}
+.stat .value{font-size:1.35rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
 .stat .sub{font-size:.7rem;color:var(--muted);margin-top:.2rem;}
-.value.pos{color:var(--green);}
-.value.neg{color:var(--red);}
+.value.pos{color:var(--up);}
+.value.neg{color:var(--down);}
 label{display:flex;flex-direction:column;font-size:.85rem;color:var(--muted);margin-top:.75rem;gap:.3rem;}
 input,select{padding:.55rem .7rem;font-size:.95rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);width:100%;font-variant-numeric:tabular-nums;}
 input:focus,select:focus{outline:none;border-color:var(--accent);}
 button.btn{padding:.6rem 1rem;font-size:.95rem;font-weight:500;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;}
 button.btn:hover{filter:brightness(1.1);}
 button.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border);}
-button.btn.danger{background:var(--red);}
+button.btn.danger{background:var(--up);}
 button.btn.small{padding:.35rem .6rem;font-size:.8rem;}
 .actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem;}
 table{width:100%;border-collapse:collapse;font-size:.85rem;}
@@ -71,7 +71,7 @@ tr:last-child td{border-bottom:none;}
 .filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem;}
 .filters select,.filters input{width:auto;flex:1;min-width:140px;}
 .empty{text-align:center;color:var(--muted);padding:2rem 1rem;font-size:.9rem;}
-.inline-del{color:var(--red);background:none;border:none;cursor:pointer;font-size:.8rem;padding:.2rem .4rem;}
+.inline-del{color:var(--up);background:none;border:none;cursor:pointer;font-size:.8rem;padding:.2rem .4rem;}
 .hint{font-size:.75rem;color:var(--muted);margin-top:.3rem;}
 .section-tabs{display:flex;gap:.25rem;margin-bottom:.75rem;background:var(--card-2);padding:.25rem;border-radius:8px;}
 .section-tabs button{flex:1;padding:.4rem;border:none;background:transparent;color:var(--muted);border-radius:6px;cursor:pointer;font-size:.82rem;}
@@ -84,7 +84,7 @@ table.entry-grid td{padding:.35rem .35rem;}
 table.entry-grid td.ch{font-weight:500;color:var(--text);min-width:8em;}
 table.entry-grid input{padding:.4rem .55rem;font-size:.9rem;}
 table.entry-grid input.note{font-size:.8rem;}
-.saved-flash{background:var(--green);color:#fff;padding:.5rem .8rem;border-radius:6px;font-size:.85rem;display:none;}
+.saved-flash{background:var(--down);color:#fff;padding:.5rem .8rem;border-radius:6px;font-size:.85rem;display:none;}
 .saved-flash.show{display:inline-block;animation:fade 1.6s forwards;}
 @keyframes fade{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
 .ch-table{width:100%;font-size:.88rem;}
@@ -197,10 +197,10 @@ table.entry-grid input.note{font-size:.8rem;}
     <div class="card">
       <div class="section-tabs" id="detail-tabs">
         <button data-list="incomes" class="active">收入</button>
-        <button data-list="jepq">JEPQ</button>
+        <button data-list="jepq">JEPQ 定投</button>
       </div>
       <div class="filters">
-        <input type="month" id="f-month">
+        <select id="f-month"><option value="">全部月份</option></select>
         <select id="f-channel"><option value="">全部渠道</option></select>
         <button class="btn ghost small" id="f-clear">清除筛选</button>
       </div>
@@ -352,6 +352,7 @@ function saveEntry(){
   save(KEYS.incomes,incomes);save(KEYS.jepq,jepq);
   const flash=document.getElementById('entry-flash');flash.classList.remove('show');void flash.offsetWidth;flash.classList.add('show');
   renderEntry();
+  refreshMonthFilter();
 }
 
 // ===== Dashboard =====
@@ -486,6 +487,18 @@ document.getElementById('channel-form').addEventListener('submit',e=>{
 function refreshChannelFilter(){
   document.getElementById('f-channel').innerHTML='<option value="">全部渠道</option>'+channels.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
 }
+function monthsWithData(){
+  const s=new Set();
+  incomes.forEach(x=>s.add(x.month));
+  jepq.forEach(x=>s.add(x.month));
+  return [...s].filter(Boolean).sort().reverse();
+}
+function refreshMonthFilter(){
+  const sel=document.getElementById('f-month');
+  const cur=sel.value;
+  const ms=monthsWithData();
+  sel.innerHTML='<option value="">全部月份</option>'+ms.map(m=>`<option${m===cur?' selected':''}>${m}</option>`).join('');
+}
 
 // ===== Detail =====
 let curList='incomes';
@@ -531,7 +544,7 @@ document.querySelectorAll('.sub-list').forEach(el=>el.addEventListener('click',e
   const kind=b.dataset.del,id=b.dataset.id;
   if(kind==='incomes'){incomes=incomes.filter(x=>x.id!==id);save(KEYS.incomes,incomes);}
   if(kind==='jepq'){jepq=jepq.filter(x=>x.id!==id);save(KEYS.jepq,jepq);}
-  renderDetail();
+  refreshMonthFilter();renderDetail();
 }));
 
 // ===== Backup =====
@@ -556,7 +569,7 @@ document.getElementById('file-import').addEventListener('change',e=>{
       if(Array.isArray(d.jepq))jepq=d.jepq;
       save(KEYS.channels,channels);save(KEYS.incomes,incomes);save(KEYS.jepq,jepq);
       migrate();
-      refreshChannelFilter();renderDash();renderChannels();renderDetail();renderEntry();
+      refreshChannelFilter();refreshMonthFilter();renderDash();renderChannels();renderDetail();renderEntry();
       alert('已导入');
     }catch(err){alert('文件格式不对：'+err.message);}
   };
@@ -574,6 +587,7 @@ document.getElementById('btn-clear').addEventListener('click',()=>{
 
 // ===== Init =====
 refreshChannelFilter();
+refreshMonthFilter();
 renderEntry();
 renderDash();
 </script>
