@@ -44,8 +44,9 @@ section.active{display:block;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-bottom:1rem;}
 .card h2{font-size:1rem;margin:0 0 .75rem;font-weight:600;}
 .grid{display:grid;gap:.75rem;}
-.grid-3{grid-template-columns:repeat(3,1fr);}
-@media(max-width:600px){.grid-3{grid-template-columns:repeat(2,1fr);}}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+@media(max-width:600px){.grid-4{grid-template-columns:repeat(2,1fr);}}
 .stat{background:var(--card-2);border-radius:10px;padding:.8rem .9rem;}
 .stat .label{font-size:.75rem;color:var(--muted);margin-bottom:.25rem;}
 .stat .value{font-size:1.2rem;font-weight:600;}
@@ -55,8 +56,6 @@ section.active{display:block;}
 label{display:flex;flex-direction:column;font-size:.85rem;color:var(--muted);margin-top:.75rem;gap:.3rem;}
 input,select{padding:.55rem .7rem;font-size:.95rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);width:100%;font-variant-numeric:tabular-nums;}
 input:focus,select:focus{outline:none;border-color:var(--accent);}
-.row{display:flex;gap:.6rem;}
-.row > label{flex:1;}
 button.btn{padding:.6rem 1rem;font-size:.95rem;font-weight:500;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;}
 button.btn:hover{filter:brightness(1.1);}
 button.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border);}
@@ -69,33 +68,6 @@ th{font-size:.75rem;color:var(--muted);font-weight:500;}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
 tr:last-child td{border-bottom:none;}
 .muted{color:var(--muted);font-size:.8rem;}
-.channel-row{display:flex;align-items:center;justify-content:space-between;padding:.7rem 0;border-bottom:1px solid var(--border);gap:.5rem;flex-wrap:wrap;}
-.channel-row:last-child{border-bottom:none;}
-.channel-row .name{font-weight:500;}
-.channel-row .stats{display:flex;gap:1rem;font-size:.8rem;color:var(--muted);}
-.channel-row .stats b{color:var(--text);font-weight:600;}
-.ch-table{width:100%;font-size:.88rem;}
-.ch-table th{padding:.45rem .5rem;color:var(--muted);font-weight:500;font-size:.75rem;border-bottom:1px solid var(--border);text-align:left;}
-.ch-table th.num{text-align:right;}
-.ch-table td{padding:.6rem .5rem;border-bottom:1px solid var(--border);}
-.ch-table td.actions-cell{text-align:right;white-space:nowrap;}
-.ch-table td.actions-cell button{margin-left:.25rem;}
-.ch-table tr.inactive td{color:var(--muted);}
-.ch-table tbody tr:last-child td{border-bottom:none;}
-.add-row{display:flex;gap:.5rem;align-items:center;margin-top:1rem;flex-wrap:wrap;}
-.add-row input[type="text"]{flex:1;min-width:160px;width:auto;}
-.inline-check{flex-direction:row;align-items:center;gap:.35rem;margin:0;color:var(--text);font-size:.88rem;white-space:nowrap;}
-.inline-check input{width:auto;}
-.chart-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.25rem;}
-.chart-meta{color:var(--muted);font-size:.8rem;margin-bottom:.5rem;}
-.chart-meta b{color:var(--text);font-weight:600;margin-left:.35rem;}
-.year-tabs{display:flex;gap:.25rem;flex-wrap:wrap;}
-.year-tabs button{padding:.3rem .7rem;font-size:.78rem;border:none;border-radius:6px;background:var(--card-2);color:var(--muted);cursor:pointer;font-weight:500;}
-.year-tabs button.active{background:var(--accent);color:#fff;}
-.chart-svg{width:100%;height:auto;display:block;}
-.chart-svg .bar{fill:var(--accent);}
-.chart-svg .chart-val{font-size:11px;fill:var(--text);font-weight:600;font-variant-numeric:tabular-nums;}
-.chart-svg .chart-lbl{font-size:11px;fill:var(--muted);}
 .filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem;}
 .filters select,.filters input{width:auto;flex:1;min-width:140px;}
 .empty{text-align:center;color:var(--muted);padding:2rem 1rem;font-size:.9rem;}
@@ -115,6 +87,26 @@ table.entry-grid input.note{font-size:.8rem;}
 .saved-flash{background:var(--green);color:#fff;padding:.5rem .8rem;border-radius:6px;font-size:.85rem;display:none;}
 .saved-flash.show{display:inline-block;animation:fade 1.6s forwards;}
 @keyframes fade{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+.ch-table{width:100%;font-size:.88rem;}
+.ch-table th{padding:.45rem .5rem;color:var(--muted);font-weight:500;font-size:.75rem;border-bottom:1px solid var(--border);text-align:left;}
+.ch-table th.num{text-align:right;}
+.ch-table td{padding:.6rem .5rem;border-bottom:1px solid var(--border);}
+.ch-table td.actions-cell{text-align:right;white-space:nowrap;}
+.ch-table td.actions-cell button{margin-left:.25rem;}
+.ch-table tr.inactive td{color:var(--muted);}
+.ch-table tbody tr:last-child td{border-bottom:none;}
+.add-row{display:flex;gap:.5rem;align-items:center;margin-top:1rem;flex-wrap:wrap;}
+.add-row input[type="text"]{flex:1;min-width:160px;width:auto;}
+.chart-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.25rem;}
+.chart-meta{color:var(--muted);font-size:.8rem;margin-bottom:.5rem;}
+.chart-meta b{color:var(--text);font-weight:600;margin-left:.35rem;}
+.year-tabs{display:flex;gap:.25rem;flex-wrap:wrap;}
+.year-tabs button{padding:.3rem .7rem;font-size:.78rem;border:none;border-radius:6px;background:var(--card-2);color:var(--muted);cursor:pointer;font-weight:500;}
+.year-tabs button.active{background:var(--accent);color:#fff;}
+.chart-svg{width:100%;height:auto;display:block;}
+.chart-svg .bar{fill:var(--accent);}
+.chart-svg .chart-val{font-size:11px;fill:var(--text);font-weight:600;font-variant-numeric:tabular-nums;}
+.chart-svg .chart-lbl{font-size:11px;fill:var(--muted);}
 </style>
 </head>
 <body>
@@ -133,13 +125,11 @@ table.entry-grid input.note{font-size:.8rem;}
   <section id="tab-dash" class="active">
     <div class="card">
       <h2>概览（USD）</h2>
-      <div class="grid grid-3">
+      <div class="grid grid-4">
         <div class="stat"><div class="label">本月收入</div><div class="value pos" id="s-month"></div><div class="sub" id="s-month-sub"></div></div>
         <div class="stat"><div class="label">YTD 收入</div><div class="value pos" id="s-ytd"></div></div>
-        <div class="stat"><div class="label">当前占用本金</div><div class="value" id="s-principal"></div></div>
-        <div class="stat"><div class="label">综合简单年化</div><div class="value" id="s-apy"></div><div class="sub">本月收入 × 12 / 本金</div></div>
         <div class="stat"><div class="label">JEPQ 累计定投</div><div class="value" id="s-jepq"></div><div class="sub" id="s-jepq-sub"></div></div>
-        <div class="stat"><div class="label">本月净现金流</div><div class="value" id="s-net"></div><div class="sub">收入 − 定投 − 追加本金</div></div>
+        <div class="stat"><div class="label">本月净现金流</div><div class="value" id="s-net"></div><div class="sub">收入 − 定投</div></div>
       </div>
     </div>
     <div class="card">
@@ -147,7 +137,7 @@ table.entry-grid input.note{font-size:.8rem;}
         <h2 style="margin:0;">月度收入</h2>
         <div class="year-tabs" id="year-tabs"></div>
       </div>
-      <div class="chart-meta"><span id="chart-period-label"></span>合计<b id="chart-total">$0.00</b></div>
+      <div class="chart-meta"><span id="chart-period-label"></span>合计<b id="chart-total">0</b></div>
       <div id="chart-canvas"></div>
     </div>
     <div class="card">
@@ -156,10 +146,8 @@ table.entry-grid input.note{font-size:.8rem;}
         <table class="ch-table">
           <thead><tr>
             <th>渠道</th>
-            <th class="num">本金</th>
             <th class="num">本月</th>
             <th class="num">YTD</th>
-            <th class="num">年化</th>
           </tr></thead>
           <tbody id="dash-channels"></tbody>
         </table>
@@ -177,14 +165,13 @@ table.entry-grid input.note{font-size:.8rem;}
         </label>
         <span id="entry-flash" class="saved-flash">已保存</span>
       </div>
-      <p class="hint">在下表里一次性填完本月各渠道的收入和本金。<b>本金 = 月末账户余额</b>，切换月份时会自动带出最近一次的本金，不变就直接保存即可。</p>
+      <p class="hint">一次性填完本月各渠道的收入。留空 = 删除该月此渠道的记录。</p>
 
       <div style="overflow-x:auto;">
         <table class="entry-grid" id="entry-table">
           <thead><tr>
             <th>渠道</th>
             <th class="num">本月收入 (USD)</th>
-            <th class="num">本金 (USD)</th>
             <th>备注</th>
           </tr></thead>
           <tbody id="entry-rows"></tbody>
@@ -210,7 +197,6 @@ table.entry-grid input.note{font-size:.8rem;}
     <div class="card">
       <div class="section-tabs" id="detail-tabs">
         <button data-list="incomes" class="active">收入</button>
-        <button data-list="principals">本金</button>
         <button data-list="jepq">JEPQ</button>
       </div>
       <div class="filters">
@@ -219,7 +205,6 @@ table.entry-grid input.note{font-size:.8rem;}
         <button class="btn ghost small" id="f-clear">清除筛选</button>
       </div>
       <div id="list-incomes" class="sub-list active"></div>
-      <div id="list-principals" class="sub-list"></div>
       <div id="list-jepq" class="sub-list"></div>
     </div>
   </section>
@@ -232,8 +217,7 @@ table.entry-grid input.note{font-size:.8rem;}
         <table class="ch-table">
           <thead><tr>
             <th>名称</th>
-            <th class="num">本金</th>
-            <th>需本金</th>
+            <th class="num">本月收入</th>
             <th></th>
           </tr></thead>
           <tbody id="channel-list"></tbody>
@@ -241,7 +225,6 @@ table.entry-grid input.note{font-size:.8rem;}
       </div>
       <form id="channel-form" class="add-row">
         <input type="text" name="name" placeholder="新渠道名称" required>
-        <label class="inline-check"><input type="checkbox" name="requires_principal" checked>需本金</label>
         <button type="submit" class="btn">新增</button>
       </form>
     </div>
@@ -262,12 +245,12 @@ table.entry-grid input.note{font-size:.8rem;}
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 
 // ===== Storage =====
-const KEYS={channels:'studio_channels',incomes:'studio_incomes',principals:'studio_principals',jepq:'studio_jepq'};
+const KEYS={channels:'studio_channels',incomes:'studio_incomes',jepq:'studio_jepq'};
 const DEFAULT_CHANNELS=[
-  {id:'ch-div',name:'股息',requires_principal:true,active:true},
-  {id:'ch-ipo',name:'港股打新',requires_principal:true,active:true},
-  {id:'ch-bfx',name:'Bitfinex 放贷',requires_principal:true,active:true},
-  {id:'ch-w3',name:'Web3 收入',requires_principal:false,active:true}
+  {id:'ch-div',name:'股息',active:true},
+  {id:'ch-ipo',name:'港股打新',active:true},
+  {id:'ch-bfx',name:'Bitfinex 放贷',active:true},
+  {id:'ch-w3',name:'Web3 收入',active:true}
 ];
 const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch{return d;}};
 const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -275,42 +258,30 @@ const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 let channels=load(KEYS.channels,null);
 if(!channels){channels=DEFAULT_CHANNELS;save(KEYS.channels,channels);}
 let incomes=load(KEYS.incomes,[]);
-let principals=load(KEYS.principals,[]);
 let jepq=load(KEYS.jepq,[]);
 
 // --- migrations ---
-const DATA_VERSION=3;
 function migrate(){
-  // v1 → v2: drop date+currency+fx_rate+direction → month+amount(USD); deltas
+  // older formats kept date+currency+fx_rate; collapse into month+amount(USD)
   const migIncome=(a)=>a.map(x=>x.month?x:({
     id:x.id,channel_id:x.channel_id,month:(x.date||'').slice(0,7),
     amount:(+x.amount)*(+x.fx_rate||1),note:x.note||''
-  }));
-  const migPrin=(a)=>a.map(x=>x.month?x:({
-    id:x.id,channel_id:x.channel_id,month:(x.date||'').slice(0,7),
-    amount:(+x.amount)*(+x.fx_rate||1)*(x.direction==='out'?-1:1),note:x.note||''
   }));
   const migJepq=(a)=>a.map(x=>x.month?x:({
     id:x.id,month:(x.date||'').slice(0,7),amount:+x.amount||0,note:x.note||''
   }));
   if(incomes.some(x=>x.month===undefined)){incomes=migIncome(incomes);save(KEYS.incomes,incomes);}
-  if(principals.some(x=>x.month===undefined)){principals=migPrin(principals);save(KEYS.principals,principals);}
   if(jepq.some(x=>x.month===undefined)){jepq=migJepq(jepq);save(KEYS.jepq,jepq);}
-  // v2 → v3: principal records change semantic from monthly delta to absolute balance
-  const v=+localStorage.getItem('studio_v')||1;
-  if(v<3){
-    const byCh={};
-    principals.forEach(p=>(byCh[p.channel_id]=byCh[p.channel_id]||[]).push(p));
-    const out=[];
-    Object.values(byCh).forEach(arr=>{
-      arr.sort((a,b)=>a.month.localeCompare(b.month));
-      let bal=0;
-      arr.forEach(r=>{bal+=+r.amount||0;out.push({...r,amount:bal});});
-    });
-    principals=out;save(KEYS.principals,principals);
-  }
+  // drop deprecated keys
   localStorage.removeItem('studio_fx');
-  localStorage.setItem('studio_v',DATA_VERSION);
+  localStorage.removeItem('studio_principals');
+  // channels: drop obsolete fields
+  let chChanged=false;
+  channels.forEach(c=>{
+    if('category' in c){delete c.category;chChanged=true;}
+    if('requires_principal' in c){delete c.requires_principal;chChanged=true;}
+  });
+  if(chChanged)save(KEYS.channels,channels);
 }
 migrate();
 
@@ -320,7 +291,6 @@ const nowMonth=()=>new Date().toISOString().slice(0,7);
 const thisMonth=nowMonth();
 const thisYear=thisMonth.slice(0,4);
 const fmtUSD=(n)=>(+n||0).toLocaleString('en-US',{maximumFractionDigits:0});
-const fmtPct=(n)=>isFinite(n)?Math.round(n*100)+'%':'—';
 const channelById=(id)=>channels.find(c=>c.id===id);
 
 // ===== Tabs =====
@@ -341,38 +311,23 @@ entryMonthInp.addEventListener('change',renderEntry);
 document.getElementById('entry-reset').addEventListener('click',renderEntry);
 document.getElementById('entry-save').addEventListener('click',saveEntry);
 
-function latestPrincipalAsOf(chId,month){
-  const recs=principals.filter(p=>p.channel_id===chId&&p.month<=month);
-  if(!recs.length)return undefined;
-  return recs.sort((a,b)=>b.month.localeCompare(a.month))[0].amount;
-}
 function renderEntry(){
   const m=entryMonthInp.value||thisMonth;
   const tbody=document.getElementById('entry-rows');
   const findInc=(chId)=>incomes.find(x=>x.channel_id===chId&&x.month===m);
-  const findPrin=(chId)=>principals.find(x=>x.channel_id===chId&&x.month===m);
   const activeCh=channels.filter(c=>c.active);
   tbody.innerHTML=activeCh.map(c=>{
-    const inc=findInc(c.id),pri=findPrin(c.id);
-    // principal default: exact match if exists; otherwise carry forward from latest prior month
-    const carried=latestPrincipalAsOf(c.id,prevMonth(m));
-    const priVal=pri?pri.amount:(carried!==undefined?carried:'');
-    const note=[inc?.note,pri?.note].filter(Boolean)[0]||'';
+    const inc=findInc(c.id);
+    const note=inc?.note||'';
     return `<tr data-ch="${c.id}">
       <td class="ch">${c.name}</td>
       <td class="num"><input type="number" step="0.01" class="f-inc" value="${inc?inc.amount:''}" placeholder="0"></td>
-      <td class="num"><input type="number" step="0.01" class="f-pri" value="${priVal}" placeholder="0" ${c.requires_principal?'':'disabled'}></td>
       <td><input type="text" class="note f-note" value="${note.replace(/"/g,'&quot;')}" placeholder="备注"></td>
     </tr>`;
-  }).join('')||'<tr><td colspan="4" class="empty">没有启用的渠道</td></tr>';
+  }).join('')||'<tr><td colspan="3" class="empty">没有启用的渠道</td></tr>';
   const jRec=jepq.find(x=>x.month===m);
   document.getElementById('entry-jepq').value=jRec?jRec.amount:'';
   document.getElementById('entry-jepq-note').value=jRec?.note||'';
-}
-function prevMonth(m){
-  const [y,mo]=m.split('-').map(Number);
-  const d=new Date(y,mo-2,1);
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
 }
 
 function upsert(arr,match,record){
@@ -386,51 +341,30 @@ function saveEntry(){
   document.querySelectorAll('#entry-rows tr[data-ch]').forEach(tr=>{
     const chId=tr.dataset.ch;
     const incV=tr.querySelector('.f-inc').value.trim();
-    const priV=tr.querySelector('.f-pri').value.trim();
     const note=tr.querySelector('.f-note').value.trim();
     if(incV==='')upsert(incomes,x=>x.channel_id===chId&&x.month===m,null);
     else upsert(incomes,x=>x.channel_id===chId&&x.month===m,{channel_id:chId,month:m,amount:+incV,note});
-    if(priV==='')upsert(principals,x=>x.channel_id===chId&&x.month===m,null);
-    else upsert(principals,x=>x.channel_id===chId&&x.month===m,{channel_id:chId,month:m,amount:+priV,note});
   });
   const jV=document.getElementById('entry-jepq').value.trim();
   const jNote=document.getElementById('entry-jepq-note').value.trim();
   if(jV==='')upsert(jepq,x=>x.month===m,null);
   else upsert(jepq,x=>x.month===m,{month:m,amount:+jV,note:jNote});
-  save(KEYS.incomes,incomes);save(KEYS.principals,principals);save(KEYS.jepq,jepq);
+  save(KEYS.incomes,incomes);save(KEYS.jepq,jepq);
   const flash=document.getElementById('entry-flash');flash.classList.remove('show');void flash.offsetWidth;flash.classList.add('show');
   renderEntry();
 }
 
 // ===== Dashboard =====
-function principalForChannel(chId,asOfMonth){
-  return latestPrincipalAsOf(chId,asOfMonth||thisMonth)??0;
-}
-function principalChangeInMonth(chId,month){
-  const cur=latestPrincipalAsOf(chId,month);
-  if(cur===undefined)return 0;
-  const prev=latestPrincipalAsOf(chId,prevMonth(month));
-  return cur-(prev??0);
-}
 function renderDash(){
   const monthInc=incomes.filter(x=>x.month===thisMonth).reduce((s,x)=>s+(+x.amount||0),0);
   const ytdInc=incomes.filter(x=>x.month.startsWith(thisYear)).reduce((s,x)=>s+(+x.amount||0),0);
-  const totalPrincipal=channels.filter(c=>c.requires_principal)
-    .reduce((s,c)=>s+Math.max(0,principalForChannel(c.id,thisMonth)),0);
-  const apy=totalPrincipal>0?(monthInc*12/totalPrincipal):NaN;
   const jepqTotal=jepq.reduce((s,x)=>s+(+x.amount||0),0);
   const jepqMonth=jepq.filter(x=>x.month===thisMonth).reduce((s,x)=>s+(+x.amount||0),0);
-  const principalAddMonth=channels.filter(c=>c.requires_principal)
-    .reduce((s,c)=>s+principalChangeInMonth(c.id,thisMonth),0);
-  const net=monthInc-jepqMonth-Math.max(0,principalAddMonth);
+  const net=monthInc-jepqMonth;
 
   document.getElementById('s-month').textContent=fmtUSD(monthInc);
   document.getElementById('s-month-sub').textContent=thisMonth;
   document.getElementById('s-ytd').textContent=fmtUSD(ytdInc);
-  document.getElementById('s-principal').textContent=fmtUSD(totalPrincipal);
-  const apyEl=document.getElementById('s-apy');
-  apyEl.textContent=fmtPct(apy);
-  apyEl.className='value '+(isFinite(apy)&&apy>0?'pos':'');
   document.getElementById('s-jepq').textContent=fmtUSD(jepqTotal);
   document.getElementById('s-jepq-sub').textContent='本月 '+fmtUSD(jepqMonth);
   const netEl=document.getElementById('s-net');
@@ -439,18 +373,14 @@ function renderDash(){
 
   const box=document.getElementById('dash-channels');
   box.innerHTML=channels.filter(c=>c.active).map(c=>{
-    const p=principalForChannel(c.id,thisMonth);
     const mInc=incomes.filter(x=>x.channel_id===c.id&&x.month===thisMonth).reduce((s,x)=>s+(+x.amount||0),0);
     const ytd=incomes.filter(x=>x.channel_id===c.id&&x.month.startsWith(thisYear)).reduce((s,x)=>s+(+x.amount||0),0);
-    const a=(c.requires_principal&&p>0)?mInc*12/p:NaN;
     return `<tr>
       <td>${c.name}</td>
-      <td class="num">${fmtUSD(p)}</td>
       <td class="num">${fmtUSD(mInc)}</td>
       <td class="num">${fmtUSD(ytd)}</td>
-      <td class="num">${c.requires_principal?fmtPct(a):'—'}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="5" class="empty">还没有启用的渠道</td></tr>';
+  }).join('')||'<tr><td colspan="3" class="empty">还没有启用的渠道</td></tr>';
   renderChart();
 }
 
@@ -519,18 +449,17 @@ document.getElementById('year-tabs').addEventListener('click',e=>{
 function renderChannels(){
   const box=document.getElementById('channel-list');
   box.innerHTML=channels.map(c=>{
-    const p=principalForChannel(c.id,thisMonth);
+    const mInc=incomes.filter(x=>x.channel_id===c.id&&x.month===thisMonth).reduce((s,x)=>s+(+x.amount||0),0);
     return `<tr${c.active?'':' class="inactive"'}>
       <td>${c.name}</td>
-      <td class="num">${fmtUSD(p)}</td>
-      <td>${c.requires_principal?'是':'否'}</td>
+      <td class="num">${fmtUSD(mInc)}</td>
       <td class="actions-cell">
         <button class="btn ghost small" data-act="toggle" data-id="${c.id}">${c.active?'停用':'启用'}</button>
         <button class="btn ghost small" data-act="rename" data-id="${c.id}">改名</button>
         <button class="btn ghost small" data-act="del" data-id="${c.id}">删除</button>
       </td>
     </tr>`;
-  }).join('')||'<tr><td colspan="4" class="empty">暂无渠道</td></tr>';
+  }).join('')||'<tr><td colspan="3" class="empty">暂无渠道</td></tr>';
 }
 document.getElementById('channel-list').addEventListener('click',e=>{
   const b=e.target.closest('button[data-act]');if(!b)return;
@@ -538,7 +467,7 @@ document.getElementById('channel-list').addEventListener('click',e=>{
   if(b.dataset.act==='toggle'){c.active=!c.active;}
   if(b.dataset.act==='rename'){const n=prompt('新名称',c.name);if(n)c.name=n.trim();}
   if(b.dataset.act==='del'){
-    const hasData=incomes.some(x=>x.channel_id===c.id)||principals.some(x=>x.channel_id===c.id);
+    const hasData=incomes.some(x=>x.channel_id===c.id);
     if(hasData&&!confirm('该渠道已有流水，删除会隐藏它但保留数据。继续？'))return;
     if(!hasData&&!confirm('确认删除该渠道？'))return;
     channels=channels.filter(x=>x.id!==c.id);
@@ -549,7 +478,7 @@ document.getElementById('channel-list').addEventListener('click',e=>{
 document.getElementById('channel-form').addEventListener('submit',e=>{
   e.preventDefault();
   const f=new FormData(e.target);
-  channels.push({id:'ch-'+uid(),name:f.get('name').trim(),requires_principal:f.get('requires_principal')==='on',active:true});
+  channels.push({id:'ch-'+uid(),name:f.get('name').trim(),active:true});
   save(KEYS.channels,channels);
   e.target.reset();
   refreshChannelFilter();renderChannels();
@@ -577,17 +506,11 @@ function renderDetail(){
   const filt=(x)=>(!m||x.month===m)&&(!ch||x.channel_id===ch);
   const sortDesc=(a,b)=>b.month.localeCompare(a.month);
   const incRows=incomes.filter(filt).sort(sortDesc);
-  const priRows=principals.filter(filt).sort(sortDesc);
   const jpRows=jepq.filter(x=>!m||x.month===m).sort(sortDesc);
 
   document.getElementById('list-incomes').innerHTML=incRows.length?tableHTML(
     ['月份','渠道','金额 USD','备注',''],
     incRows.map(r=>[r.month,channelById(r.channel_id)?.name||'—',fmtUSD(r.amount),r.note||'',delBtn('incomes',r.id)])
-  ):'<div class="empty">无记录</div>';
-
-  document.getElementById('list-principals').innerHTML=priRows.length?tableHTML(
-    ['月份','渠道','金额 USD','备注',''],
-    priRows.map(r=>[r.month,channelById(r.channel_id)?.name||'—',fmtUSD(r.amount),r.note||'',delBtn('principals',r.id)])
   ):'<div class="empty">无记录</div>';
 
   document.getElementById('list-jepq').innerHTML=jpRows.length?tableHTML(
@@ -607,14 +530,13 @@ document.querySelectorAll('.sub-list').forEach(el=>el.addEventListener('click',e
   if(!confirm('删除这条记录？'))return;
   const kind=b.dataset.del,id=b.dataset.id;
   if(kind==='incomes'){incomes=incomes.filter(x=>x.id!==id);save(KEYS.incomes,incomes);}
-  if(kind==='principals'){principals=principals.filter(x=>x.id!==id);save(KEYS.principals,principals);}
   if(kind==='jepq'){jepq=jepq.filter(x=>x.id!==id);save(KEYS.jepq,jepq);}
   renderDetail();
 }));
 
 // ===== Backup =====
 document.getElementById('btn-export').addEventListener('click',()=>{
-  const data={channels,incomes,principals,jepq,exported_at:new Date().toISOString(),version:2};
+  const data={channels,incomes,jepq,exported_at:new Date().toISOString(),version:4};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
@@ -631,9 +553,8 @@ document.getElementById('file-import').addEventListener('change',e=>{
       if(!confirm('导入会覆盖当前数据，确认继续？'))return;
       if(Array.isArray(d.channels))channels=d.channels;
       if(Array.isArray(d.incomes))incomes=d.incomes;
-      if(Array.isArray(d.principals))principals=d.principals;
       if(Array.isArray(d.jepq))jepq=d.jepq;
-      save(KEYS.channels,channels);save(KEYS.incomes,incomes);save(KEYS.principals,principals);save(KEYS.jepq,jepq);
+      save(KEYS.channels,channels);save(KEYS.incomes,incomes);save(KEYS.jepq,jepq);
       migrate();
       refreshChannelFilter();renderDash();renderChannels();renderDetail();renderEntry();
       alert('已导入');
@@ -645,6 +566,9 @@ document.getElementById('btn-clear').addEventListener('click',()=>{
   if(!confirm('将清空所有记录和自定义渠道，此操作不可撤销。确认？'))return;
   if(!confirm('再次确认：真的清空全部数据？'))return;
   Object.values(KEYS).forEach(k=>localStorage.removeItem(k));
+  localStorage.removeItem('studio_principals');
+  localStorage.removeItem('studio_fx');
+  localStorage.removeItem('studio_v');
   location.reload();
 });
 
