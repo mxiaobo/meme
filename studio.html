@@ -121,6 +121,24 @@ table.entry-grid input.note{font-size:12px;}
 .chart-svg .bar{fill:var(--accent);}
 .chart-svg .chart-val{font-size:11px;fill:var(--text1);font-weight:600;font-variant-numeric:tabular-nums;}
 .chart-svg .chart-lbl{font-size:11px;fill:var(--text2);}
+.month-trigger{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:13px;color:var(--text1);cursor:pointer;font-family:inherit;min-width:140px;text-align:left;font-variant-numeric:tabular-nums;}
+.month-trigger:hover{border-color:var(--accent);}
+.month-trigger:focus{outline:none;border-color:var(--accent);}
+.month-popup{position:absolute;z-index:100;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.12);padding:12px 16px;min-width:280px;}
+.month-popup[hidden]{display:none;}
+.mp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;}
+.mp-year{font-size:15px;font-weight:700;color:var(--text1);letter-spacing:1px;}
+.mp-nav{background:none;border:none;cursor:pointer;font-size:20px;line-height:1;padding:4px 12px;color:var(--text2);font-family:inherit;border-radius:4px;}
+.mp-nav:hover{color:var(--text1);background:var(--hover);}
+.mp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+.mp-month{background:none;border:none;cursor:pointer;padding:14px 0 18px;font-size:13px;color:var(--text3);border-radius:6px;position:relative;font-family:inherit;font-variant-numeric:tabular-nums;}
+.mp-month:hover{background:var(--hover);color:var(--text1);}
+.mp-month.selected{color:var(--text1);font-weight:700;}
+.mp-month.has-data::after{content:'';position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:5px;height:5px;background:var(--accent);border-radius:50%;}
+.mp-foot{margin-top:6px;border-top:1px solid var(--border);padding-top:6px;text-align:center;}
+.mp-foot[hidden]{display:none;}
+.mp-all{background:none;border:none;cursor:pointer;color:var(--text2);font-size:12px;padding:6px 12px;font-family:inherit;letter-spacing:.3px;border-radius:4px;}
+.mp-all:hover{color:var(--accent);background:var(--hover);}
 </style>
 </head>
 <body>
@@ -175,7 +193,7 @@ table.entry-grid input.note{font-size:12px;}
       <div class="month-head">
         <h2 style="margin:0;">月度录入</h2>
         <label style="margin:0;flex:0 0 auto;">月份
-          <input type="month" id="entry-month">
+          <button type="button" class="month-trigger" id="entry-month"></button>
         </label>
         <span id="entry-flash" class="saved-flash">已保存</span>
       </div>
@@ -214,7 +232,7 @@ table.entry-grid input.note{font-size:12px;}
         <button data-list="jepq">JEPQ 定投</button>
       </div>
       <div class="filters">
-        <select id="f-month"><option value="">全部月份</option></select>
+        <button type="button" class="month-trigger" id="f-month"></button>
         <select id="f-channel"><option value="">全部渠道</option></select>
         <button class="btn ghost small" id="f-clear">清除筛选</button>
       </div>
@@ -254,6 +272,18 @@ table.entry-grid input.note{font-size:12px;}
     </div>
   </section>
 </main>
+
+<div class="month-popup" id="month-popup" hidden>
+  <div class="mp-head">
+    <button type="button" class="mp-nav" data-nav="-1">‹</button>
+    <div class="mp-year"></div>
+    <button type="button" class="mp-nav" data-nav="1">›</button>
+  </div>
+  <div class="mp-grid"></div>
+  <div class="mp-foot" hidden>
+    <button type="button" class="mp-all">全部月份</button>
+  </div>
+</div>
 
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
@@ -310,6 +340,7 @@ const channelById=(id)=>channels.find(c=>c.id===id);
 // ===== Tabs =====
 document.getElementById('tabs').addEventListener('click',e=>{
   const b=e.target.closest('button[data-tab]');if(!b)return;
+  if(typeof closeMonthPicker==='function')closeMonthPicker();
   document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));
   document.querySelectorAll('main > section').forEach(s=>s.classList.toggle('active',s.id==='tab-'+b.dataset.tab));
   if(b.dataset.tab==='dash')renderDash();
@@ -320,13 +351,17 @@ document.getElementById('tabs').addEventListener('click',e=>{
 
 // ===== Monthly Entry =====
 const entryMonthInp=document.getElementById('entry-month');
-entryMonthInp.value=thisMonth;
-entryMonthInp.addEventListener('change',renderEntry);
+entryMonthInp.dataset.allowAll='false';
 document.getElementById('entry-reset').addEventListener('click',renderEntry);
 document.getElementById('entry-save').addEventListener('click',saveEntry);
+entryMonthInp.addEventListener('click',e=>{
+  e.stopPropagation();
+  if(activePicker&&activePicker.trigger===entryMonthInp){closeMonthPicker();return;}
+  openMonthPicker(entryMonthInp,{allowAll:false,markedMonths:monthsWithData(),onChange:renderEntry});
+});
 
 function renderEntry(){
-  const m=entryMonthInp.value||thisMonth;
+  const m=entryMonthInp.dataset.value||thisMonth;
   const tbody=document.getElementById('entry-rows');
   const findInc=(chId)=>incomes.find(x=>x.channel_id===chId&&x.month===m);
   const activeCh=channels.filter(c=>c.active);
@@ -351,7 +386,7 @@ function upsert(arr,match,record){
   else arr.push({id:uid(),...record});
 }
 function saveEntry(){
-  const m=entryMonthInp.value||thisMonth;
+  const m=entryMonthInp.dataset.value||thisMonth;
   document.querySelectorAll('#entry-rows tr[data-ch]').forEach(tr=>{
     const chId=tr.dataset.ch;
     const incV=tr.querySelector('.f-inc').value.trim();
@@ -366,7 +401,6 @@ function saveEntry(){
   save(KEYS.incomes,incomes);save(KEYS.jepq,jepq);
   const flash=document.getElementById('entry-flash');flash.classList.remove('show');void flash.offsetWidth;flash.classList.add('show');
   renderEntry();
-  refreshMonthFilter();
 }
 
 // ===== Dashboard =====
@@ -507,12 +541,57 @@ function monthsWithData(){
   jepq.forEach(x=>s.add(x.month));
   return [...s].filter(Boolean).sort().reverse();
 }
-function refreshMonthFilter(){
-  const sel=document.getElementById('f-month');
-  const cur=sel.value;
-  const ms=monthsWithData();
-  sel.innerHTML='<option value="">全部月份</option>'+ms.map(m=>`<option${m===cur?' selected':''}>${m}</option>`).join('');
+// ===== Month picker popup =====
+const popup=document.getElementById('month-popup');
+let activePicker=null;
+function setPickerValue(btn,val){
+  btn.dataset.value=val||'';
+  const allowAll=btn.dataset.allowAll==='true';
+  btn.textContent=val?`${val.slice(0,4)}年${+val.slice(5,7)}月`:(allowAll?'全部月份':'');
 }
+function openMonthPicker(trigger,opts){
+  activePicker={trigger,opts};
+  const v=trigger.dataset.value;
+  popup.dataset.year=v?+v.slice(0,4):new Date().getFullYear();
+  popup.querySelector('.mp-foot').hidden=!opts.allowAll;
+  renderPopup();
+  popup.hidden=false;
+  // position after layout so height is known
+  const rect=trigger.getBoundingClientRect();
+  const h=popup.offsetHeight;
+  const below=window.innerHeight-rect.bottom;
+  const top=(below<h+10&&rect.top>h+10)
+    ?rect.top+window.scrollY-h-4
+    :rect.bottom+window.scrollY+4;
+  popup.style.top=top+'px';
+  popup.style.left=rect.left+window.scrollX+'px';
+}
+function closeMonthPicker(){popup.hidden=true;activePicker=null;}
+function renderPopup(){
+  if(!activePicker)return;
+  const year=+popup.dataset.year;
+  const sel=activePicker.trigger.dataset.value||'';
+  const marks=new Set(activePicker.opts.markedMonths||[]);
+  popup.querySelector('.mp-year').textContent=`${year} 年`;
+  popup.querySelector('.mp-grid').innerHTML=Array.from({length:12},(_,i)=>{
+    const key=`${year}-${String(i+1).padStart(2,'0')}`;
+    const cls=['mp-month',sel===key?'selected':'',marks.has(key)?'has-data':''].filter(Boolean).join(' ');
+    return `<button type="button" class="${cls}" data-val="${key}">${i+1}月</button>`;
+  }).join('');
+}
+popup.addEventListener('click',e=>{
+  const nav=e.target.closest('.mp-nav');
+  if(nav){popup.dataset.year=+popup.dataset.year+(+nav.dataset.nav);renderPopup();return;}
+  const m=e.target.closest('.mp-month');
+  if(m){const v=m.dataset.val;setPickerValue(activePicker.trigger,v);activePicker.opts.onChange(v);closeMonthPicker();return;}
+  if(e.target.closest('.mp-all')){setPickerValue(activePicker.trigger,'');activePicker.opts.onChange('');closeMonthPicker();}
+});
+document.addEventListener('click',e=>{
+  if(!activePicker)return;
+  if(e.target===activePicker.trigger||popup.contains(e.target))return;
+  closeMonthPicker();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMonthPicker();});
 
 // ===== Detail =====
 let curList='incomes';
@@ -524,11 +603,19 @@ document.getElementById('detail-tabs').addEventListener('click',e=>{
   document.getElementById('f-channel').style.display=curList==='jepq'?'none':'';
   renderDetail();
 });
-['f-month','f-channel'].forEach(id=>document.getElementById(id).addEventListener('change',renderDetail));
-document.getElementById('f-clear').addEventListener('click',()=>{document.getElementById('f-month').value='';document.getElementById('f-channel').value='';renderDetail();});
+const fMonthBtn=document.getElementById('f-month');
+fMonthBtn.dataset.allowAll='true';
+setPickerValue(fMonthBtn,'');
+fMonthBtn.addEventListener('click',e=>{
+  e.stopPropagation();
+  if(activePicker&&activePicker.trigger===fMonthBtn){closeMonthPicker();return;}
+  openMonthPicker(fMonthBtn,{allowAll:true,markedMonths:monthsWithData(),onChange:renderDetail});
+});
+document.getElementById('f-channel').addEventListener('change',renderDetail);
+document.getElementById('f-clear').addEventListener('click',()=>{setPickerValue(fMonthBtn,'');document.getElementById('f-channel').value='';renderDetail();});
 
 function renderDetail(){
-  const m=document.getElementById('f-month').value;
+  const m=fMonthBtn.dataset.value||'';
   const ch=document.getElementById('f-channel').value;
   const filt=(x)=>(!m||x.month===m)&&(!ch||x.channel_id===ch);
   const sortDesc=(a,b)=>b.month.localeCompare(a.month);
@@ -558,7 +645,7 @@ document.querySelectorAll('.sub-list').forEach(el=>el.addEventListener('click',e
   const kind=b.dataset.del,id=b.dataset.id;
   if(kind==='incomes'){incomes=incomes.filter(x=>x.id!==id);save(KEYS.incomes,incomes);}
   if(kind==='jepq'){jepq=jepq.filter(x=>x.id!==id);save(KEYS.jepq,jepq);}
-  refreshMonthFilter();renderDetail();
+  renderDetail();
 }));
 
 // ===== Backup =====
@@ -583,7 +670,7 @@ document.getElementById('file-import').addEventListener('change',e=>{
       if(Array.isArray(d.jepq))jepq=d.jepq;
       save(KEYS.channels,channels);save(KEYS.incomes,incomes);save(KEYS.jepq,jepq);
       migrate();
-      refreshChannelFilter();refreshMonthFilter();renderDash();renderChannels();renderDetail();renderEntry();
+      refreshChannelFilter();renderDash();renderChannels();renderDetail();renderEntry();
       alert('已导入');
     }catch(err){alert('文件格式不对：'+err.message);}
   };
@@ -600,8 +687,8 @@ document.getElementById('btn-clear').addEventListener('click',()=>{
 });
 
 // ===== Init =====
+setPickerValue(entryMonthInp,thisMonth);
 refreshChannelFilter();
-refreshMonthFilter();
 renderEntry();
 renderDash();
 </script>
