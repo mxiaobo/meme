@@ -466,7 +466,10 @@ function renderChart(){
     periodLabel=`${chartView} 年 `;
   }
   const totals=monthKeys.map(m=>incomes.filter(x=>x.month===m).reduce((s,x)=>s+(+x.amount||0),0));
-  const max=Math.max(1,...totals);
+  // global max across every recorded month so bar heights are comparable between years
+  const byMonth={};
+  incomes.forEach(x=>{byMonth[x.month]=(byMonth[x.month]||0)+(+x.amount||0);});
+  const max=Math.max(1,...Object.values(byMonth),...totals);
   const total=totals.reduce((a,b)=>a+b,0);
   const W=720,H=240,padL=10,padR=10,padT=28,padB=32;
   const chartW=W-padL-padR,chartH=H-padT-padB;
