@@ -86,9 +86,8 @@ tr:last-child td{border-bottom:none;}
 .section-tabs button.active{background:var(--card);color:var(--text1);box-shadow:0 1px 2px rgba(0,0,0,.06);}
 .sub-list{display:none;}
 .sub-list.active{display:block;}
-.month-head{display:flex;align-items:center;gap:16px;margin-bottom:8px;flex-wrap:wrap;}
-.month-head h2{margin:0;}
-.month-head input{max-width:180px;}
+.month-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.month-trigger-lg{padding:10px 16px;font-size:15px;font-weight:600;min-width:180px;}
 table.entry-grid{margin-top:4px;}
 table.entry-grid th{background:var(--th-bg);}
 table.entry-grid td{padding:8px 10px;}
@@ -190,10 +189,7 @@ table.entry-grid input.note{font-size:12px;}
   <section id="tab-entry">
     <div class="card">
       <div class="month-head">
-        <h2 style="margin:0;">月度录入</h2>
-        <label style="margin:0;flex:0 0 auto;">月份
-          <button type="button" class="month-trigger" id="entry-month"></button>
-        </label>
+        <button type="button" class="month-trigger month-trigger-lg" id="entry-month"></button>
         <span id="entry-flash" class="saved-flash">已保存</span>
       </div>
       <p class="hint">一次性填完本月各渠道的收入。留空 = 删除该月此渠道的记录。</p>
