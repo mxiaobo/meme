@@ -80,7 +80,6 @@ tr:last-child td{border-bottom:none;}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
 .filters select,.filters input{width:auto;flex:1;min-width:140px;}
 .empty{text-align:center;color:var(--text3);padding:32px 16px;font-size:13px;}
-.inline-del{color:var(--down);background:none;border:none;cursor:pointer;font-size:12px;padding:4px 6px;font-family:inherit;}
 .hint{font-size:11px;color:var(--text3);margin-top:8px;line-height:1.5;}
 .section-tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--bg);padding:3px;border-radius:8px;border:1px solid var(--border);}
 .section-tabs button{flex:1;padding:7px;border:none;background:transparent;color:var(--text2);border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;letter-spacing:.3px;}
@@ -617,6 +616,7 @@ fMonthBtn.addEventListener('click',e=>{
 document.getElementById('f-channel').addEventListener('change',renderDetail);
 document.getElementById('f-clear').addEventListener('click',()=>{setPickerValue(fMonthBtn,'');document.getElementById('f-channel').value='';renderDetail();});
 
+let editingKind=null,editingId=null;
 function renderDetail(){
   const m=fMonthBtn.dataset.value||'';
   const ch=document.getElementById('f-channel').value;
@@ -625,30 +625,62 @@ function renderDetail(){
   const incRows=incomes.filter(filt).sort(sortDesc);
   const jpRows=jepq.filter(x=>!m||x.month===m).sort(sortDesc);
 
-  document.getElementById('list-incomes').innerHTML=incRows.length?tableHTML(
-    ['月份','渠道','金额 USD','备注',''],
-    incRows.map(r=>[r.month,channelById(r.channel_id)?.name||'—',fmtUSD(r.amount),r.note||'',delBtn('incomes',r.id)])
+  document.getElementById('list-incomes').innerHTML=incRows.length?renderTable(
+    'incomes',['月份','渠道','金额 USD','备注',''],incRows,
+    r=>[r.month,channelById(r.channel_id)?.name||'—',r.amount,r.note||'']
   ):'<div class="empty">无记录</div>';
 
-  document.getElementById('list-jepq').innerHTML=jpRows.length?tableHTML(
-    ['月份','金额 USD','备注',''],
-    jpRows.map(r=>[r.month,fmtUSD(r.amount),r.note||'',delBtn('jepq',r.id)])
+  document.getElementById('list-jepq').innerHTML=jpRows.length?renderTable(
+    'jepq',['月份','金额 USD','备注',''],jpRows,
+    r=>[r.month,r.amount,r.note||'']
   ):'<div class="empty">无记录</div>';
 }
-function tableHTML(heads,rows){
+function renderTable(kind,heads,rows,cellFn){
   const numCols=new Set(['金额 USD']);
-  return `<table><thead><tr>${heads.map(h=>`<th class="${numCols.has(h)?'num':''}">${h}</th>`).join('')}</tr></thead><tbody>${
-    rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${numCols.has(heads[i])?'num':''}">${c}</td>`).join('')}</tr>`).join('')
-  }</tbody></table>`;
+  const thead=`<thead><tr>${heads.map(h=>`<th class="${numCols.has(h)?'num':''}">${h}</th>`).join('')}</tr></thead>`;
+  const trs=rows.map(r=>{
+    const editing=kind===editingKind&&r.id===editingId;
+    const cells=cellFn(r);
+    const tds=cells.map((c,i)=>{
+      const h=heads[i];
+      if(editing&&h==='金额 USD')return `<td class="num"><input type="number" class="edit-amount" value="${c}" step="0.01" min="0" style="max-width:120px;text-align:right;"></td>`;
+      if(editing&&h==='备注')return `<td><input type="text" class="edit-note" value="${(c||'').replace(/"/g,'&quot;')}"></td>`;
+      return `<td class="${numCols.has(h)?'num':''}">${h==='金额 USD'?fmtUSD(c):c}</td>`;
+    }).join('');
+    const actCell=editing
+      ? `<td class="actions-cell">
+          <button class="btn small" data-act="save" data-kind="${kind}" data-id="${r.id}">保存</button>
+          <button class="btn danger small" data-act="del" data-kind="${kind}" data-id="${r.id}">删除</button>
+          <button class="btn ghost small" data-act="cancel">取消</button>
+        </td>`
+      : `<td class="actions-cell"><button class="btn ghost small" data-act="edit" data-kind="${kind}" data-id="${r.id}">修改</button></td>`;
+    return `<tr>${tds}${actCell}</tr>`;
+  }).join('');
+  return `<table>${thead}<tbody>${trs}</tbody></table>`;
 }
-function delBtn(kind,id){return `<button class="inline-del" data-del="${kind}" data-id="${id}">删除</button>`;}
 document.querySelectorAll('.sub-list').forEach(el=>el.addEventListener('click',e=>{
-  const b=e.target.closest('button[data-del]');if(!b)return;
-  if(!confirm('删除这条记录？'))return;
-  const kind=b.dataset.del,id=b.dataset.id;
-  if(kind==='incomes'){incomes=incomes.filter(x=>x.id!==id);save(KEYS.incomes,incomes);}
-  if(kind==='jepq'){jepq=jepq.filter(x=>x.id!==id);save(KEYS.jepq,jepq);}
-  renderDetail();
+  const b=e.target.closest('button[data-act]');if(!b)return;
+  const act=b.dataset.act,kind=b.dataset.kind,id=b.dataset.id;
+  if(act==='edit'){editingKind=kind;editingId=id;renderDetail();return;}
+  if(act==='cancel'){editingKind=null;editingId=null;renderDetail();return;}
+  if(act==='save'){
+    const row=b.closest('tr');
+    const amt=parseFloat(row.querySelector('.edit-amount').value);
+    const note=row.querySelector('.edit-note').value.trim();
+    if(!(amt>=0)){alert('请输入有效金额');return;}
+    const arr=kind==='incomes'?incomes:jepq;
+    const r=arr.find(x=>x.id===id);
+    if(r){r.amount=amt;r.note=note;save(KEYS[kind],arr);}
+    editingKind=null;editingId=null;renderDetail();
+    return;
+  }
+  if(act==='del'){
+    if(!confirm('删除这条记录？'))return;
+    if(kind==='incomes')incomes=incomes.filter(x=>x.id!==id);
+    else jepq=jepq.filter(x=>x.id!==id);
+    save(KEYS[kind],kind==='incomes'?incomes:jepq);
+    editingKind=null;editingId=null;renderDetail();
+  }
 }));
 
 // ===== Backup =====
