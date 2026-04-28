@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% set active_page = 'projects' %}
+{% block title %}新建项目{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h2>新建项目</h2>
+  <a class="btn secondary" href="{{ url_for('projects.index') }}">返回</a>
+</div>
+
+<div class="card">
+  <form method="post">
+    <div class="field">
+      <label>股票代码 *</label>
+      <input type="text" name="code" required placeholder="如 02145">
+    </div>
+    <div class="field">
+      <label>股票名称 *</label>
+      <input type="text" name="name" required>
+    </div>
+    <div class="field">
+      <label>上市日期</label>
+      <input type="date" name="listing_date">
+    </div>
+    <div class="field">
+      <label>备注</label>
+      <textarea name="note"></textarea>
+    </div>
+    <button type="submit" class="btn">创建</button>
+  </form>
+</div>
+{% endblock %}

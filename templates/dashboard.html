@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% set active_page = 'home' %}
+{% block title %}首页 - 打新结算系统{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h2>首页</h2>
+  <span class="muted">{{ today }}</span>
+</div>
+
+<div class="grid">
+  <div class="stat">
+    <div class="label">启用 / 总参与人</div>
+    <div class="value">{{ active_count }} / {{ total_count }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">未结算记录</div>
+    <div class="value">{{ open_subs }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">已卖出待结算</div>
+    <div class="value">{{ sold_unsettled }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">最近结算</div>
+    <div class="value">
+      {% if last %}{{ last.month }}{% else %}—{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>各参与人当前预支余额</h3>
+  {% if balances %}
+    <table>
+      <thead><tr><th>姓名</th><th class="num">余额</th></tr></thead>
+      <tbody>
+        {% for b in balances %}
+        <tr>
+          <td><a href="{{ url_for('participants.detail', pid=b.id) }}">{{ b.name }}</a></td>
+          <td class="num {% if b.balance > 0 %}neg{% endif %}">{{ b.balance|money }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">尚未添加参与人。</p>
+  {% endif %}
+</div>
+
+{% if last %}
+<div class="card">
+  <h3>最近一次结算（{{ last.month }}）</h3>
+  <p>
+    应得分红合计：<b>{{ last.total_share|money }}</b> ·
+    实发合计：<b>{{ last.total_payout|money }}</b> ·
+    参与人数：{{ last.line_count }}
+  </p>
+  <a class="btn small secondary" href="{{ url_for('settlements.detail', sid=last.id) }}">查看详情</a>
+</div>
+{% endif %}
+{% endblock %}

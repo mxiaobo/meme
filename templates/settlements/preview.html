@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% set active_page = 'settlements' %}
+{% block title %}{{ month }} 结算预览{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h2>{{ month }} 月度结算预览</h2>
+  <a class="btn secondary" href="{{ url_for('settlements.index') }}">返回</a>
+</div>
+
+<div class="card">
+  <form method="get" action="{{ url_for('settlements.preview') }}" class="toolbar">
+    <div class="field">
+      <label>切换月份</label>
+      <input type="month" name="month" value="{{ month }}" required>
+    </div>
+    <button class="btn secondary" type="submit">查看</button>
+  </form>
+</div>
+
+{% if lines %}
+<div class="card">
+  <h3>结算明细</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>姓名</th>
+        <th class="num">本月净利润</th>
+        <th class="num">应得分红 (30%)</th>
+        <th class="num">期初预支</th>
+        <th class="num">本次抵扣</th>
+        <th class="num">期末预支</th>
+        <th class="num">实发金额</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set ns = namespace(net=0, share=0, before=0, deducted=0, after=0, payout=0) %}
+      {% for l in lines %}
+      <tr>
+        <td>{{ l.participant_name }}</td>
+        <td class="num {% if l.net_profit > 0 %}pos{% elif l.net_profit < 0 %}neg{% endif %}">{{ l.net_profit|money }}</td>
+        <td class="num">{{ l.share|money }}</td>
+        <td class="num">{{ l.advance_before|money }}</td>
+        <td class="num">{{ l.deducted|money }}</td>
+        <td class="num">{{ l.advance_after|money }}</td>
+        <td class="num {% if l.payout < 0 %}neg{% elif l.payout > 0 %}pos{% endif %}">{{ l.payout|money }}</td>
+      </tr>
+      {% set ns.net = ns.net + l.net_profit %}
+      {% set ns.share = ns.share + l.share %}
+      {% set ns.before = ns.before + l.advance_before %}
+      {% set ns.deducted = ns.deducted + l.deducted %}
+      {% set ns.after = ns.after + l.advance_after %}
+      {% set ns.payout = ns.payout + l.payout %}
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td><b>合计</b></td>
+        <td class="num"><b>{{ ns.net|money }}</b></td>
+        <td class="num"><b>{{ ns.share|money }}</b></td>
+        <td class="num"><b>{{ ns.before|money }}</b></td>
+        <td class="num"><b>{{ ns.deducted|money }}</b></td>
+        <td class="num"><b>{{ ns.after|money }}</b></td>
+        <td class="num"><b>{{ ns.payout|money }}</b></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<div class="card">
+  <h3>各人涉及的中签记录</h3>
+  {% for l in lines %}
+    <h4 style="margin-top:1rem;">{{ l.participant_name }}</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>项目</th>
+          <th class="num">手数</th>
+          <th class="num">成本</th>
+          <th class="num">卖出收入</th>
+          <th>卖出日期</th>
+          <th class="num">盈亏</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in l.subscriptions %}
+        <tr>
+          <td>{{ s.project_code }} · {{ s.project_name }}</td>
+          <td class="num">{{ s.lots }}</td>
+          <td class="num">{{ s.cost|money }}</td>
+          <td class="num">{{ s.sell_revenue|money }}</td>
+          <td>{{ s.sell_date }}</td>
+          <td class="num {% if s.profit > 0 %}pos{% elif s.profit < 0 %}neg{% endif %}">{{ s.profit|money }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <form method="post" action="{{ url_for('settlements.confirm') }}"
+        onsubmit="return confirm('确认结算 {{ month }}？该月份所有已卖出的中签记录将被锁定。');">
+    <input type="hidden" name="month" value="{{ month }}">
+    <button class="btn" type="submit">确认结算 {{ month }}</button>
+    <span class="muted" style="margin-left:.6rem;">提示：本操作会自动备份数据库。</span>
+  </form>
+</div>
+{% else %}
+<div class="card">
+  <p class="muted">{{ month }} 没有可结算的中签记录（即没有"卖出日期在本月、未结算、且已填卖出收入"的条目）。</p>
+</div>
+{% endif %}
+{% endblock %}

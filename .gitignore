@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+data/portfolio.db
+data/backups/
+.venv/
+.env
+*.xlsx

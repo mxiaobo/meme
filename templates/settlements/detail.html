@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% set active_page = 'settlements' %}
+{% block title %}{{ s.month }} 结算详情{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h2>{{ s.month }} 结算详情
+    {% if s.status == 'settled' %}<span class="tag settled">已结算</span>
+    {% else %}<span class="tag reversed">已反结算</span>{% endif %}
+  </h2>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('settlements.export', sid=s.id) }}">导出 Excel</a>
+    <a class="btn secondary" href="{{ url_for('settlements.index') }}">返回</a>
+  </div>
+</div>
+
+<div class="card">
+  <p>结算时间：{{ s.created_at }}{% if s.reversed_at %} · 反结算时间：{{ s.reversed_at }}{% endif %}</p>
+
+  {% if lines %}
+  <table>
+    <thead>
+      <tr>
+        <th>姓名</th>
+        <th class="num">本月净利润</th>
+        <th class="num">应得分红 (30%)</th>
+        <th class="num">期初预支</th>
+        <th class="num">本次抵扣</th>
+        <th class="num">期末预支</th>
+        <th class="num">实发金额</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set ns = namespace(net=0, share=0, before=0, deducted=0, after=0, payout=0) %}
+      {% for l in lines %}
+      <tr>
+        <td>{{ l.participant_name }}</td>
+        <td class="num {% if l.net_profit > 0 %}pos{% elif l.net_profit < 0 %}neg{% endif %}">{{ l.net_profit|money }}</td>
+        <td class="num">{{ l.share|money }}</td>
+        <td class="num">{{ l.advance_before|money }}</td>
+        <td class="num">{{ l.deducted|money }}</td>
+        <td class="num">{{ l.advance_after|money }}</td>
+        <td class="num {% if l.payout < 0 %}neg{% elif l.payout > 0 %}pos{% endif %}">{{ l.payout|money }}</td>
+      </tr>
+      {% set ns.net = ns.net + l.net_profit %}
+      {% set ns.share = ns.share + l.share %}
+      {% set ns.before = ns.before + l.advance_before %}
+      {% set ns.deducted = ns.deducted + l.deducted %}
+      {% set ns.after = ns.after + l.advance_after %}
+      {% set ns.payout = ns.payout + l.payout %}
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td><b>合计</b></td>
+        <td class="num"><b>{{ ns.net|money }}</b></td>
+        <td class="num"><b>{{ ns.share|money }}</b></td>
+        <td class="num"><b>{{ ns.before|money }}</b></td>
+        <td class="num"><b>{{ ns.deducted|money }}</b></td>
+        <td class="num"><b>{{ ns.after|money }}</b></td>
+        <td class="num"><b>{{ ns.payout|money }}</b></td>
+      </tr>
+    </tfoot>
+  </table>
+  {% endif %}
+</div>
+
+{% if subs_by_pid %}
+<div class="card">
+  <h3>本结算覆盖的中签记录</h3>
+  {% for l in lines %}
+    {% if subs_by_pid.get(l.participant_id) %}
+    <h4 style="margin-top:1rem;">{{ l.participant_name }}</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>项目</th>
+          <th class="num">手数</th>
+          <th class="num">成本</th>
+          <th class="num">卖出收入</th>
+          <th>卖出日期</th>
+          <th class="num">盈亏</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s_row in subs_by_pid[l.participant_id] %}
+        {% set pf = (s_row.sell_revenue or 0) - (s_row.cost or 0) %}
+        <tr>
+          <td>{{ s_row.project_code }} · {{ s_row.project_name }}</td>
+          <td class="num">{{ s_row.lots }}</td>
+          <td class="num">{{ s_row.cost|money }}</td>
+          <td class="num">{{ s_row.sell_revenue|money }}</td>
+          <td>{{ s_row.sell_date }}</td>
+          <td class="num {% if pf > 0 %}pos{% elif pf < 0 %}neg{% endif %}">{{ pf|money }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if s.status == 'settled' %}
+<div class="card">
+  <h3>反结算（管理员操作）</h3>
+  <p class="muted">反结算会解锁本月的所有中签记录、撤销预支抵扣，并将结算单标记为"已反结算"。</p>
+  <form method="post" action="{{ url_for('settlements.reverse', sid=s.id) }}"
+        style="display:flex; gap:.6rem; flex-wrap:wrap; align-items:end;">
+    <div class="field" style="margin:0;">
+      <label>请输入"确认反结算"以继续</label>
+      <input type="text" name="confirm_text" required placeholder="确认反结算">
+    </div>
+    <button class="btn danger" type="submit">执行反结算</button>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

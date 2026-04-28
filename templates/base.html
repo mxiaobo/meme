@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}打新结算系统{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <h1>打新结算系统</h1>
+    <nav>
+      {% set active = active_page|default('') %}
+      <a href="{{ url_for('dashboard') }}" class="{% if active=='home' %}active{% endif %}">首页</a>
+      <a href="{{ url_for('participants.index') }}" class="{% if active=='participants' %}active{% endif %}">账户参与人</a>
+      <a href="{{ url_for('projects.index') }}" class="{% if active=='projects' %}active{% endif %}">中签管理</a>
+      <a href="{{ url_for('settlements.index') }}" class="{% if active=='settlements' %}active{% endif %}">月度结算</a>
+    </nav>
+  </aside>
+  <main class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash">
+          {% for cat, m in messages %}
+            <div class="msg {{ cat }}">{{ m }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

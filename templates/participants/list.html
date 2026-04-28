@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% set active_page = 'participants' %}
+{% block title %}账户参与人{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h2>账户参与人</h2>
+  <a class="btn" href="{{ url_for('participants.new') }}">+ 新增参与人</a>
+</div>
+
+<div class="card">
+  {% if participants %}
+  <table>
+    <thead>
+      <tr>
+        <th>姓名</th>
+        <th>证券账号</th>
+        <th>状态</th>
+        <th class="num">预支余额</th>
+        <th>备注</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in participants %}
+      <tr>
+        <td><a href="{{ url_for('participants.detail', pid=p.id) }}">{{ p.name }}</a></td>
+        <td>{{ p.securities_account or '' }}</td>
+        <td>
+          {% if p.status == 'active' %}
+            <span class="tag active">启用</span>
+          {% else %}
+            <span class="tag inactive">停用</span>
+          {% endif %}
+        </td>
+        <td class="num {% if p.advance_balance > 0 %}neg{% endif %}">{{ p.advance_balance|money }}</td>
+        <td class="muted">{{ p.note or '' }}</td>
+        <td><a class="btn small secondary" href="{{ url_for('participants.detail', pid=p.id) }}">详情</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">尚未添加参与人。</p>
+  {% endif %}
+</div>
+{% endblock %}

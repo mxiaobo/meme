@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set active_page = 'projects' %}
+{% block title %}中签管理{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h2>中签管理</h2>
+  <a class="btn" href="{{ url_for('projects.new') }}">+ 新建项目</a>
+</div>
+
+<div class="card">
+  {% if projects %}
+  <table>
+    <thead>
+      <tr>
+        <th>代码</th>
+        <th>名称</th>
+        <th>上市日期</th>
+        <th class="num">参与人数</th>
+        <th class="num">已卖出</th>
+        <th class="num">已结算</th>
+        <th class="num">总成本</th>
+        <th class="num">总收入</th>
+        <th class="num">总盈亏</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in projects %}
+      <tr>
+        <td>{{ p.code }}</td>
+        <td><a href="{{ url_for('projects.detail', proj_id=p.id) }}">{{ p.name }}</a></td>
+        <td>{{ p.listing_date or '' }}</td>
+        <td class="num">{{ p.sub_count or 0 }}</td>
+        <td class="num">{{ p.sold_count or 0 }}</td>
+        <td class="num">{{ p.settled_count or 0 }}</td>
+        <td class="num">{{ p.total_cost|money }}</td>
+        <td class="num">{{ p.total_revenue|money }}</td>
+        {% set profit = (p.total_revenue or 0) - (p.total_cost or 0) %}
+        <td class="num {% if profit > 0 %}pos{% elif profit < 0 %}neg{% endif %}">{{ profit|money }}</td>
+        <td><a class="btn small secondary" href="{{ url_for('projects.detail', proj_id=p.id) }}">详情</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">尚未创建项目。</p>
+  {% endif %}
+</div>
+{% endblock %}

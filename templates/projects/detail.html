@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% set active_page = 'projects' %}
+{% block title %}{{ project.name }} - 项目{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h2>{{ project.code }} · {{ project.name }}</h2>
+  <div class="actions">
+    <form method="post" action="{{ url_for('projects.delete', proj_id=project.id) }}"
+          onsubmit="return confirm('确认删除该项目及其所有未结算记录？');" class="inline-form">
+      <button class="btn danger" type="submit">删除项目</button>
+    </form>
+    <a class="btn secondary" href="{{ url_for('projects.index') }}">返回列表</a>
+  </div>
+</div>
+
+<div class="card">
+  <h3>项目信息</h3>
+  <form method="post" action="{{ url_for('projects.update_info', proj_id=project.id) }}"
+        style="display:flex; gap:.75rem; flex-wrap:wrap; align-items:end;">
+    <div class="field" style="margin:0;">
+      <label>股票代码</label>
+      <input type="text" name="code" value="{{ project.code }}" required>
+    </div>
+    <div class="field" style="margin:0;">
+      <label>股票名称</label>
+      <input type="text" name="name" value="{{ project.name }}" required>
+    </div>
+    <div class="field" style="margin:0;">
+      <label>上市日期</label>
+      <input type="date" name="listing_date" value="{{ project.listing_date or '' }}">
+    </div>
+    <div class="field" style="margin:0; flex:1;">
+      <label>备注</label>
+      <input type="text" name="note" value="{{ project.note or '' }}">
+    </div>
+    <button class="btn" type="submit">保存信息</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>中签录入</h3>
+  <p class="muted" style="margin-top:-.4rem;">
+    勾选"中签"的参与人，再填写其手数、成本、卖出收入、卖出日期。
+    取消勾选会删除该参与人在本项目的记录（已结算的记录会被锁定，无法修改）。
+  </p>
+
+  <form method="post" action="{{ url_for('projects.save_subscriptions', proj_id=project.id) }}">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:60px;">中签</th>
+          <th>姓名</th>
+          <th class="num">中签手数</th>
+          <th class="num">成本</th>
+          <th class="num">卖出收入</th>
+          <th>卖出日期</th>
+          <th class="num">盈亏</th>
+          <th>状态</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          {% set p = r.participant %}
+          {% set s = r.sub %}
+          {% set locked = s and s.status == 'settled' %}
+          <tr class="{% if locked %}row-locked{% endif %}">
+            <td>
+              <input type="hidden" name="pid" value="{{ p.id }}">
+              {% if locked %}
+                <input type="hidden" name="checked_{{ p.id }}" value="1">
+                ✓
+              {% else %}
+                <input type="checkbox" name="checked_{{ p.id }}" value="1"
+                       {% if s %}checked{% endif %}>
+              {% endif %}
+            </td>
+            <td>
+              {{ p.name }}
+              {% if p.status == 'inactive' %}<span class="tag inactive">停用</span>{% endif %}
+            </td>
+            <td class="num">
+              <input type="number" name="lots_{{ p.id }}" min="0"
+                     value="{{ s.lots if s else 0 }}" {% if locked %}disabled{% endif %}>
+            </td>
+            <td class="num">
+              <input type="number" name="cost_{{ p.id }}" step="0.01" min="0"
+                     value="{{ s.cost if s else 0 }}" {% if locked %}disabled{% endif %}>
+            </td>
+            <td class="num">
+              <input type="number" name="sell_revenue_{{ p.id }}" step="0.01"
+                     value="{{ s.sell_revenue if s and s.sell_revenue is not none else '' }}"
+                     {% if locked %}disabled{% endif %}>
+            </td>
+            <td>
+              <input type="date" name="sell_date_{{ p.id }}"
+                     value="{{ s.sell_date if s and s.sell_date else '' }}"
+                     {% if locked %}disabled{% endif %}>
+            </td>
+            <td class="num">
+              {% if s and s.sell_revenue is not none %}
+                {% set pf = s.sell_revenue - s.cost %}
+                <span class="{% if pf > 0 %}pos{% elif pf < 0 %}neg{% endif %}">{{ pf|money }}</span>
+              {% else %}
+                <span class="muted">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if locked %}<span class="tag settled">已结算</span>
+              {% elif s %}<span class="tag open">未结算</span>
+              {% else %}<span class="muted">未参与</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3"><b>合计</b></td>
+          <td class="num"><b>{{ total_cost|money }}</b></td>
+          <td class="num"><b>{{ total_revenue|money }}</b></td>
+          <td></td>
+          <td class="num {% if total_profit > 0 %}pos{% elif total_profit < 0 %}neg{% endif %}">
+            <b>{{ total_profit|money }}</b>
+          </td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div style="margin-top:1rem;">
+      <button class="btn" type="submit">保存中签</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

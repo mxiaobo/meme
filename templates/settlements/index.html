@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% set active_page = 'settlements' %}
+{% block title %}月度结算{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h2>月度结算</h2>
+</div>
+
+<div class="card">
+  <h3>新建/查看月度结算</h3>
+  <form method="get" action="{{ url_for('settlements.preview') }}" class="toolbar">
+    <div class="field">
+      <label>选择月份</label>
+      <input type="month" name="month" value="{{ default_month }}" required>
+    </div>
+    <button type="submit" class="btn">查看预览</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>结算历史</h3>
+  {% if settlements %}
+  <table>
+    <thead>
+      <tr>
+        <th>月份</th>
+        <th>状态</th>
+        <th class="num">参与人数</th>
+        <th class="num">应得分红合计</th>
+        <th class="num">实发合计</th>
+        <th>结算时间</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in settlements %}
+      <tr>
+        <td>{{ s.month }}</td>
+        <td>
+          {% if s.status == 'settled' %}<span class="tag settled">已结算</span>
+          {% else %}<span class="tag reversed">已反结算</span>{% endif %}
+        </td>
+        <td class="num">{{ s.line_count }}</td>
+        <td class="num">{{ s.total_share|money }}</td>
+        <td class="num">{{ s.total_payout|money }}</td>
+        <td class="muted">{{ s.created_at }}</td>
+        <td><a class="btn small secondary" href="{{ url_for('settlements.detail', sid=s.id) }}">查看</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">暂无结算记录。</p>
+  {% endif %}
+</div>
+{% endblock %}
