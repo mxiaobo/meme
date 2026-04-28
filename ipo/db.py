@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS participants (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     securities_account TEXT,
+    initial_balance REAL NOT NULL DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'active',
     note TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
@@ -42,7 +43,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     participant_id INTEGER NOT NULL REFERENCES participants(id),
     lots INTEGER NOT NULL DEFAULT 0,
     cost REAL NOT NULL DEFAULT 0,
-    sell_revenue REAL,
+    balance_after REAL,
     sell_date TEXT,
     status TEXT NOT NULL DEFAULT 'open',
     settlement_id INTEGER REFERENCES settlements(id),
@@ -78,6 +79,26 @@ CREATE INDEX IF NOT EXISTS idx_lines_settlement ON settlement_lines(settlement_i
 """
 
 
+def _columns(conn, table):
+    return [r[1] for r in conn.execute(f"PRAGMA table_info({table})").fetchall()]
+
+
+def _migrate(conn):
+    cols_p = _columns(conn, "participants")
+    if "initial_balance" not in cols_p:
+        conn.execute(
+            "ALTER TABLE participants ADD COLUMN initial_balance REAL NOT NULL DEFAULT 0"
+        )
+
+    cols_s = _columns(conn, "subscriptions")
+    if "balance_after" not in cols_s and "sell_revenue" in cols_s:
+        conn.execute(
+            "ALTER TABLE subscriptions RENAME COLUMN sell_revenue TO balance_after"
+        )
+    elif "balance_after" not in cols_s:
+        conn.execute("ALTER TABLE subscriptions ADD COLUMN balance_after REAL")
+
+
 def get_db():
     if "db" not in g:
         conn = sqlite3.connect(
@@ -101,6 +122,7 @@ def init_db(app):
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     conn = sqlite3.connect(db_path)
     conn.executescript(SCHEMA)
+    _migrate(conn)
     conn.commit()
     conn.close()
 

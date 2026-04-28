@@ -39,7 +39,7 @@ def create_app():
 
         sold_unsettled = db.execute(
             """SELECT COUNT(*) AS c FROM subscriptions
-               WHERE status='open' AND sell_revenue IS NOT NULL"""
+               WHERE status='open' AND balance_after IS NOT NULL"""
         ).fetchone()["c"]
 
         balances = all_advance_balances(db)

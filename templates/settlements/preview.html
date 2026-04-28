@@ -67,28 +67,33 @@
 </div>
 
 <div class="card">
-  <h3>各人涉及的中签记录</h3>
+  <h3>各人涉及的中签记录（链式计算）</h3>
   {% for l in lines %}
-    <h4 style="margin-top:1rem;">{{ l.participant_name }}</h4>
+    <h4 style="margin-top:1rem;">
+      {{ l.participant_name }}
+      <small class="muted" style="font-weight:normal;">初始余额 {{ l.initial_balance|money }}</small>
+    </h4>
     <table>
       <thead>
         <tr>
           <th>项目</th>
-          <th class="num">手数</th>
-          <th class="num">成本</th>
-          <th class="num">卖出收入</th>
           <th>卖出日期</th>
-          <th class="num">盈亏</th>
+          <th class="num">手数</th>
+          <th class="num">成本（参考）</th>
+          <th class="num">上次余额</th>
+          <th class="num">卖出后余额</th>
+          <th class="num">本只盈亏</th>
         </tr>
       </thead>
       <tbody>
         {% for s in l.subscriptions %}
         <tr>
           <td>{{ s.project_code }} · {{ s.project_name }}</td>
+          <td>{{ s.sell_date }}</td>
           <td class="num">{{ s.lots }}</td>
           <td class="num">{{ s.cost|money }}</td>
-          <td class="num">{{ s.sell_revenue|money }}</td>
-          <td>{{ s.sell_date }}</td>
+          <td class="num muted">{{ s.prev_balance|money }}</td>
+          <td class="num">{{ s.balance_after|money }}</td>
           <td class="num {% if s.profit > 0 %}pos{% elif s.profit < 0 %}neg{% endif %}">{{ s.profit|money }}</td>
         </tr>
         {% endfor %}

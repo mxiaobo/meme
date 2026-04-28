@@ -25,19 +25,48 @@ def new():
         if not name:
             flash("姓名不能为空", "error")
             return render_template("participants/form.html", participant=None)
+        try:
+            initial_balance = float(request.form.get("initial_balance", "").strip())
+        except ValueError:
+            flash("初始余额必填且必须为数字", "error")
+            return render_template("participants/form.html", participant=None)
+
         db = get_db()
-        db.execute(
-            """INSERT INTO participants (name, securities_account, status, note)
-               VALUES (?, ?, 'active', ?)""",
+        cur = db.execute(
+            """INSERT INTO participants
+               (name, securities_account, initial_balance, status, note)
+               VALUES (?, ?, ?, 'active', ?)""",
             (
                 name,
                 request.form.get("securities_account", "").strip() or None,
+                initial_balance,
                 request.form.get("note", "").strip() or None,
             ),
         )
+        pid = cur.lastrowid
+
+        adv_amt_raw = request.form.get("advance_amount", "").strip()
+        if adv_amt_raw:
+            try:
+                adv_amt = float(adv_amt_raw)
+            except ValueError:
+                adv_amt = 0
+            adv_date = request.form.get("advance_date", "").strip()
+            if adv_amt and adv_date:
+                db.execute(
+                    """INSERT INTO advances
+                       (participant_id, amount, kind, date, note)
+                       VALUES (?, ?, 'advance', ?, ?)""",
+                    (
+                        pid,
+                        adv_amt,
+                        adv_date,
+                        request.form.get("advance_note", "").strip() or None,
+                    ),
+                )
         db.commit()
         flash("已创建", "ok")
-        return redirect(url_for("participants.index"))
+        return redirect(url_for("participants.detail", pid=pid))
     return render_template("participants/form.html", participant=None)
 
 
@@ -84,12 +113,19 @@ def edit(pid):
         if not name:
             flash("姓名不能为空", "error")
             return render_template("participants/form.html", participant=p)
+        try:
+            initial_balance = float(request.form.get("initial_balance", "").strip())
+        except ValueError:
+            flash("初始余额必填且必须为数字", "error")
+            return render_template("participants/form.html", participant=p)
         db.execute(
-            """UPDATE participants SET name=?, securities_account=?, note=?
+            """UPDATE participants
+               SET name=?, securities_account=?, initial_balance=?, note=?
                WHERE id=?""",
             (
                 name,
                 request.form.get("securities_account", "").strip() or None,
+                initial_balance,
                 request.form.get("note", "").strip() or None,
                 pid,
             ),

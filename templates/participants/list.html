@@ -15,6 +15,7 @@
         <th>姓名</th>
         <th>证券账号</th>
         <th>状态</th>
+        <th class="num">初始余额</th>
         <th class="num">预支余额</th>
         <th>备注</th>
         <th></th>
@@ -32,6 +33,7 @@
             <span class="tag inactive">停用</span>
           {% endif %}
         </td>
+        <td class="num">{{ p.initial_balance|money }}</td>
         <td class="num {% if p.advance_balance > 0 %}neg{% endif %}">{{ p.advance_balance|money }}</td>
         <td class="muted">{{ p.note or '' }}</td>
         <td><a class="btn small secondary" href="{{ url_for('participants.detail', pid=p.id) }}">详情</a></td>

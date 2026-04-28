@@ -18,9 +18,34 @@
       <input type="text" name="securities_account" value="{{ participant.securities_account if participant and participant.securities_account else '' }}">
     </div>
     <div class="field">
+      <label>初始余额 *</label>
+      <input type="number" name="initial_balance" step="0.01" required
+             value="{{ '%.2f'|format(participant.initial_balance) if participant else '' }}">
+      <small class="muted">证券账户的起始本金。每月结算后利润会被转出，账户回到此余额作为下个月的起点。</small>
+    </div>
+    <div class="field">
       <label>备注</label>
       <textarea name="note">{{ participant.note if participant and participant.note else '' }}</textarea>
     </div>
+
+    {% if not participant %}
+    <fieldset style="border:1px solid var(--border); border-radius:6px; padding:.75rem 1rem; margin:.75rem 0;">
+      <legend class="muted" style="padding:0 .4rem;">同时新增预支记录（可选）</legend>
+      <div class="field">
+        <label>预支金额</label>
+        <input type="number" name="advance_amount" step="0.01" placeholder="留空则不创建">
+      </div>
+      <div class="field">
+        <label>预支日期</label>
+        <input type="date" name="advance_date">
+      </div>
+      <div class="field">
+        <label>预支备注</label>
+        <input type="text" name="advance_note" placeholder="如：机票 1500 / 开户费">
+      </div>
+    </fieldset>
+    {% endif %}
+
     <button type="submit" class="btn">保存</button>
   </form>
 </div>

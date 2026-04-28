@@ -66,7 +66,7 @@
 
 {% if subs_by_pid %}
 <div class="card">
-  <h3>本结算覆盖的中签记录</h3>
+  <h3>本结算覆盖的中签记录（链式计算）</h3>
   {% for l in lines %}
     {% if subs_by_pid.get(l.participant_id) %}
     <h4 style="margin-top:1rem;">{{ l.participant_name }}</h4>
@@ -74,23 +74,24 @@
       <thead>
         <tr>
           <th>项目</th>
-          <th class="num">手数</th>
-          <th class="num">成本</th>
-          <th class="num">卖出收入</th>
           <th>卖出日期</th>
-          <th class="num">盈亏</th>
+          <th class="num">手数</th>
+          <th class="num">成本（参考）</th>
+          <th class="num">上次余额</th>
+          <th class="num">卖出后余额</th>
+          <th class="num">本只盈亏</th>
         </tr>
       </thead>
       <tbody>
         {% for s_row in subs_by_pid[l.participant_id] %}
-        {% set pf = (s_row.sell_revenue or 0) - (s_row.cost or 0) %}
         <tr>
           <td>{{ s_row.project_code }} · {{ s_row.project_name }}</td>
+          <td>{{ s_row.sell_date }}</td>
           <td class="num">{{ s_row.lots }}</td>
           <td class="num">{{ s_row.cost|money }}</td>
-          <td class="num">{{ s_row.sell_revenue|money }}</td>
-          <td>{{ s_row.sell_date }}</td>
-          <td class="num {% if pf > 0 %}pos{% elif pf < 0 %}neg{% endif %}">{{ pf|money }}</td>
+          <td class="num muted">{{ s_row.prev_balance|money }}</td>
+          <td class="num">{{ s_row.balance_after|money }}</td>
+          <td class="num {% if s_row.profit and s_row.profit > 0 %}pos{% elif s_row.profit and s_row.profit < 0 %}neg{% endif %}">{{ s_row.profit|money }}</td>
         </tr>
         {% endfor %}
       </tbody>

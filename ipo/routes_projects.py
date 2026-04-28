@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 from .db import get_db
-from .logic import active_settlement_for_month, month_of
+from .logic import (
+    active_settlement_for_month, month_of, chain_profit_for_subscription,
+)
 
 bp = Blueprint("projects", __name__, url_prefix="/projects")
 
@@ -11,10 +13,9 @@ def index():
     rows = db.execute(
         """SELECT p.*,
                   COUNT(s.id) AS sub_count,
-                  SUM(CASE WHEN s.sell_revenue IS NOT NULL THEN 1 ELSE 0 END) AS sold_count,
+                  SUM(CASE WHEN s.balance_after IS NOT NULL THEN 1 ELSE 0 END) AS sold_count,
                   SUM(CASE WHEN s.status = 'settled' THEN 1 ELSE 0 END) AS settled_count,
-                  COALESCE(SUM(s.cost), 0) AS total_cost,
-                  COALESCE(SUM(s.sell_revenue), 0) AS total_revenue
+                  COALESCE(SUM(s.cost), 0) AS total_cost
            FROM projects p
            LEFT JOIN subscriptions s ON s.project_id = p.id
            GROUP BY p.id
@@ -70,23 +71,29 @@ def detail(proj_id):
 
     rows = []
     total_cost = 0.0
-    total_rev = 0.0
+    total_profit = 0.0
+    sold_count = 0
     for p in participants:
         sub = subs_by_pid.get(p["id"])
         if p["status"] == "inactive" and not sub:
             continue
+        profit = None
         if sub:
             total_cost += float(sub["cost"] or 0)
-            total_rev += float(sub["sell_revenue"] or 0)
-        rows.append({"participant": dict(p), "sub": sub})
+            if sub["balance_after"] is not None and sub["sell_date"]:
+                profit = chain_profit_for_subscription(db, sub["id"])
+                if profit is not None:
+                    total_profit += profit
+                    sold_count += 1
+        rows.append({"participant": dict(p), "sub": sub, "profit": profit})
 
     return render_template(
         "projects/detail.html",
         project=proj,
         rows=rows,
         total_cost=total_cost,
-        total_revenue=total_rev,
-        total_profit=total_rev - total_cost,
+        total_profit=total_profit,
+        sold_count=sold_count,
     )
 
 
@@ -157,23 +164,23 @@ def save_subscriptions(proj_id):
             cost = float(request.form.get(f"cost_{pid}") or 0)
         except ValueError:
             cost = 0.0
-        sell_rev_raw = request.form.get(f"sell_revenue_{pid}", "").strip()
+        ba_raw = request.form.get(f"balance_after_{pid}", "").strip()
         sell_date_raw = request.form.get(f"sell_date_{pid}", "").strip()
 
-        if sell_rev_raw:
+        if ba_raw:
             try:
-                sell_rev = float(sell_rev_raw)
+                balance_after = float(ba_raw)
             except ValueError:
-                errors.append(f"参与人 #{pid} 的卖出收入格式错误")
-                sell_rev = None
+                errors.append(f"参与人 #{pid} 的卖出后余额格式错误")
+                continue
         else:
-            sell_rev = None
+            balance_after = None
 
         sell_date = sell_date_raw or None
 
-        if (sell_rev is None) != (sell_date is None):
+        if (balance_after is None) != (sell_date is None):
             errors.append(
-                f"参与人 #{pid}：卖出收入与卖出日期必须同时填写或同时留空"
+                f"参与人 #{pid}：卖出后余额与卖出日期必须同时填写或同时留空"
             )
             continue
 
@@ -189,16 +196,16 @@ def save_subscriptions(proj_id):
         if cur:
             db.execute(
                 """UPDATE subscriptions
-                   SET lots=?, cost=?, sell_revenue=?, sell_date=?
+                   SET lots=?, cost=?, balance_after=?, sell_date=?
                    WHERE id=?""",
-                (lots, cost, sell_rev, sell_date, cur["id"]),
+                (lots, cost, balance_after, sell_date, cur["id"]),
             )
         else:
             db.execute(
                 """INSERT INTO subscriptions
-                   (project_id, participant_id, lots, cost, sell_revenue, sell_date)
+                   (project_id, participant_id, lots, cost, balance_after, sell_date)
                    VALUES (?, ?, ?, ?, ?, ?)""",
-                (proj_id, pid, lots, cost, sell_rev, sell_date),
+                (proj_id, pid, lots, cost, balance_after, sell_date),
             )
 
     db.commit()

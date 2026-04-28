@@ -40,19 +40,25 @@
 <div class="card">
   <h3>中签录入</h3>
   <p class="muted" style="margin-top:-.4rem;">
-    勾选"中签"的参与人，再填写其手数、成本、卖出收入、卖出日期。
-    取消勾选会删除该参与人在本项目的记录（已结算的记录会被锁定，无法修改）。
+    勾选"中签"的参与人，再填写其手数、成本（参考）、卖出后余额、卖出日期。
+    "盈亏"按链式法计算（卖出后余额 − 上一次卖出后余额，链头为该参与人的初始余额）。
+    取消勾选会删除该参与人在本项目的记录；已结算的行无法修改。
   </p>
 
   <form method="post" action="{{ url_for('projects.save_subscriptions', proj_id=project.id) }}">
     <table>
       <thead>
         <tr>
-          <th style="width:60px;">中签</th>
+          <th style="width:60px;">
+            <label style="display:flex; align-items:center; gap:.3rem; cursor:pointer;">
+              <input type="checkbox" id="check_all" title="全选 / 反选未结算行">
+              <span style="font-size:.7rem;">全选</span>
+            </label>
+          </th>
           <th>姓名</th>
           <th class="num">中签手数</th>
-          <th class="num">成本</th>
-          <th class="num">卖出收入</th>
+          <th class="num">成本（参考）</th>
+          <th class="num">卖出后余额</th>
           <th>卖出日期</th>
           <th class="num">盈亏</th>
           <th>状态</th>
@@ -70,13 +76,14 @@
                 <input type="hidden" name="checked_{{ p.id }}" value="1">
                 ✓
               {% else %}
-                <input type="checkbox" name="checked_{{ p.id }}" value="1"
+                <input type="checkbox" class="row-check" name="checked_{{ p.id }}" value="1"
                        {% if s %}checked{% endif %}>
               {% endif %}
             </td>
             <td>
               {{ p.name }}
               {% if p.status == 'inactive' %}<span class="tag inactive">停用</span>{% endif %}
+              <small class="muted" style="display:block;">初始 {{ p.initial_balance|money }}</small>
             </td>
             <td class="num">
               <input type="number" name="lots_{{ p.id }}" min="0"
@@ -87,8 +94,8 @@
                      value="{{ s.cost if s else 0 }}" {% if locked %}disabled{% endif %}>
             </td>
             <td class="num">
-              <input type="number" name="sell_revenue_{{ p.id }}" step="0.01"
-                     value="{{ s.sell_revenue if s and s.sell_revenue is not none else '' }}"
+              <input type="number" name="balance_after_{{ p.id }}" step="0.01"
+                     value="{{ s.balance_after if s and s.balance_after is not none else '' }}"
                      {% if locked %}disabled{% endif %}>
             </td>
             <td>
@@ -97,9 +104,10 @@
                      {% if locked %}disabled{% endif %}>
             </td>
             <td class="num">
-              {% if s and s.sell_revenue is not none %}
-                {% set pf = s.sell_revenue - s.cost %}
-                <span class="{% if pf > 0 %}pos{% elif pf < 0 %}neg{% endif %}">{{ pf|money }}</span>
+              {% if r.profit is not none %}
+                <span class="{% if r.profit > 0 %}pos{% elif r.profit < 0 %}neg{% endif %}">
+                  {{ r.profit|money }}
+                </span>
               {% else %}
                 <span class="muted">—</span>
               {% endif %}
@@ -117,10 +125,10 @@
         <tr>
           <td colspan="3"><b>合计</b></td>
           <td class="num"><b>{{ total_cost|money }}</b></td>
-          <td class="num"><b>{{ total_revenue|money }}</b></td>
-          <td></td>
+          <td colspan="2"></td>
           <td class="num {% if total_profit > 0 %}pos{% elif total_profit < 0 %}neg{% endif %}">
             <b>{{ total_profit|money }}</b>
+            <small class="muted" style="display:block; font-weight:normal;">已卖 {{ sold_count }} 笔</small>
           </td>
           <td></td>
         </tr>
@@ -132,4 +140,27 @@
     </div>
   </form>
 </div>
+
+<script>
+(function () {
+  var master = document.getElementById('check_all');
+  var rows = document.querySelectorAll('.row-check');
+  if (!master) return;
+
+  function syncMasterFromRows() {
+    var total = rows.length;
+    if (total === 0) { master.checked = false; master.indeterminate = false; return; }
+    var checked = 0;
+    rows.forEach(function (cb) { if (cb.checked) checked++; });
+    master.checked = checked === total;
+    master.indeterminate = checked > 0 && checked < total;
+  }
+
+  master.addEventListener('change', function () {
+    rows.forEach(function (cb) { cb.checked = master.checked; });
+  });
+  rows.forEach(function (cb) { cb.addEventListener('change', syncMasterFromRows); });
+  syncMasterFromRows();
+})();
+</script>
 {% endblock %}

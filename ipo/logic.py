@@ -1,4 +1,4 @@
-"""Settlement business logic."""
+"""Settlement business logic with chain-based per-stock profit."""
 from datetime import date
 from .db import get_db, backup_db
 
@@ -34,67 +34,115 @@ def month_of(date_str):
     return date_str[:7] if date_str else None
 
 
-def compute_preview(db, month):
-    """Compute what a settlement for `month` (YYYY-MM) would look like.
+def chain_profit_for_subscription(db, sub_id):
+    """Compute chain profit for a single subscription.
 
-    Returns: list of dicts (one per participant who has activity in `month`).
+    Within the same calendar month for the same participant, find the previous
+    sold subscription (by sell_date asc, id asc) and use its balance_after.
+    If none, use participant.initial_balance as the chain head.
+    Returns None if the subscription itself has no balance_after / sell_date.
+    """
+    sub = db.execute(
+        """SELECT s.*, p.initial_balance
+           FROM subscriptions s
+           JOIN participants p ON p.id = s.participant_id
+           WHERE s.id = ?""",
+        (sub_id,),
+    ).fetchone()
+    if not sub or sub["balance_after"] is None or not sub["sell_date"]:
+        return None
+
+    prev = db.execute(
+        """SELECT balance_after FROM subscriptions
+           WHERE participant_id = ?
+             AND balance_after IS NOT NULL
+             AND sell_date IS NOT NULL
+             AND substr(sell_date, 1, 7) = substr(?, 1, 7)
+             AND (sell_date < ? OR (sell_date = ? AND id < ?))
+           ORDER BY sell_date DESC, id DESC LIMIT 1""",
+        (
+            sub["participant_id"], sub["sell_date"],
+            sub["sell_date"], sub["sell_date"], sub["id"],
+        ),
+    ).fetchone()
+    prev_balance = float(prev["balance_after"]) if prev else float(sub["initial_balance"])
+    return round(float(sub["balance_after"]) - prev_balance, 2)
+
+
+def compute_preview(db, month):
+    """Compute a settlement preview for `month` (YYYY-MM).
+
+    Returns one entry per participant who has at least one sold subscription
+    in that month, with the chain-based per-sub profits and the rolled up
+    monthly figures.
     """
     rows = db.execute(
-        """SELECT s.*, p.name AS participant_name, pr.code, pr.name AS project_name
+        """SELECT s.*,
+                  p.name AS participant_name,
+                  p.initial_balance,
+                  pr.code AS project_code,
+                  pr.name AS project_name
            FROM subscriptions s
            JOIN participants p ON p.id = s.participant_id
            JOIN projects pr ON pr.id = s.project_id
            WHERE s.status = 'open'
+             AND s.balance_after IS NOT NULL
              AND s.sell_date IS NOT NULL
              AND substr(s.sell_date, 1, 7) = ?
-             AND s.sell_revenue IS NOT NULL""",
+           ORDER BY s.participant_id, s.sell_date, s.id""",
         (month,),
     ).fetchall()
 
     by_part = {}
     for r in rows:
         pid = r["participant_id"]
-        bucket = by_part.setdefault(
-            pid,
-            {
-                "participant_id": pid,
-                "participant_name": r["participant_name"],
-                "subscriptions": [],
-                "net_profit": 0.0,
-            },
-        )
-        profit = float(r["sell_revenue"]) - float(r["cost"])
-        bucket["subscriptions"].append(
-            {
-                "id": r["id"],
-                "project_code": r["code"],
-                "project_name": r["project_name"],
-                "lots": r["lots"],
-                "cost": float(r["cost"]),
-                "sell_revenue": float(r["sell_revenue"]),
-                "sell_date": r["sell_date"],
-                "profit": profit,
-            }
-        )
-        bucket["net_profit"] += profit
+        bucket = by_part.setdefault(pid, {
+            "participant_id": pid,
+            "participant_name": r["participant_name"],
+            "initial_balance": float(r["initial_balance"]),
+            "raw_subs": [],
+        })
+        bucket["raw_subs"].append(dict(r))
 
     result = []
     for pid, b in by_part.items():
-        net = round(b["net_profit"], 2)
+        prev_balance = b["initial_balance"]
+        items = []
+        for r in b["raw_subs"]:
+            ba = float(r["balance_after"])
+            profit = round(ba - prev_balance, 2)
+            items.append({
+                "id": r["id"],
+                "project_code": r["project_code"],
+                "project_name": r["project_name"],
+                "lots": r["lots"],
+                "cost": float(r["cost"] or 0),
+                "balance_after": ba,
+                "sell_date": r["sell_date"],
+                "prev_balance": prev_balance,
+                "profit": profit,
+            })
+            prev_balance = ba
+
+        net = round(sum(s["profit"] for s in items), 2)
         share = round(max(net, 0) * SHARE_RATIO, 2)
         before = round(advance_balance(db, pid), 2)
         deducted = round(min(share, before), 2) if before > 0 else 0.0
         after = round(max(0.0, before - share), 2)
         payout = round(share - before, 2)
-        b.update(
-            net_profit=net,
-            share=share,
-            advance_before=before,
-            deducted=deducted,
-            advance_after=after,
-            payout=payout,
-        )
-        result.append(b)
+
+        result.append({
+            "participant_id": pid,
+            "participant_name": b["participant_name"],
+            "initial_balance": b["initial_balance"],
+            "subscriptions": items,
+            "net_profit": net,
+            "share": share,
+            "advance_before": before,
+            "deducted": deducted,
+            "advance_after": after,
+            "payout": payout,
+        })
 
     result.sort(key=lambda x: x["participant_name"])
     return result
@@ -201,14 +249,36 @@ def get_settlement_lines(db, settlement_id):
 
 
 def get_settlement_subscriptions(db, settlement_id):
+    """Return subs of a settlement annotated with their chain profit.
+
+    Re-computes chain profit on the fly using each participant's stored
+    initial_balance (still valid since balance_after on settled subs is locked).
+    """
     rows = db.execute(
-        """SELECT s.*, p.name AS participant_name,
-                  pr.code AS project_code, pr.name AS project_name
+        """SELECT s.*,
+                  p.name AS participant_name,
+                  p.initial_balance,
+                  pr.code AS project_code,
+                  pr.name AS project_name
            FROM subscriptions s
            JOIN participants p ON p.id = s.participant_id
            JOIN projects pr ON pr.id = s.project_id
            WHERE s.settlement_id = ?
-           ORDER BY s.sell_date, p.name""",
+           ORDER BY s.participant_id, s.sell_date, s.id""",
         (settlement_id,),
     ).fetchall()
-    return [dict(r) for r in rows]
+
+    out = []
+    last_balance_by_pid = {}
+    for r in rows:
+        pid = r["participant_id"]
+        prev = last_balance_by_pid.get(pid, float(r["initial_balance"]))
+        ba = float(r["balance_after"]) if r["balance_after"] is not None else None
+        profit = round(ba - prev, 2) if ba is not None else None
+        d = dict(r)
+        d["prev_balance"] = prev
+        d["profit"] = profit
+        out.append(d)
+        if ba is not None:
+            last_balance_by_pid[pid] = ba
+    return out

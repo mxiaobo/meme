@@ -21,6 +21,8 @@
 <div class="card">
   <h3>基本信息</h3>
   <p>证券账号：<b>{{ p.securities_account or '—' }}</b></p>
+  <p>初始余额：<b>{{ p.initial_balance|money }}</b>
+    <span class="muted">（链式利润计算的起点）</span></p>
   <p>当前预支余额：
     <b class="{% if balance > 0 %}neg{% endif %}">{{ balance|money }}</b>
     {% if balance > 0 %}<span class="muted">（待抵扣）</span>{% endif %}
